@@ -18,6 +18,9 @@ def inference(
     batch_size: int = 16,
 ) -> None:
 
+    # TODO: Need to create dataloaders for evaluation(without label_dict), i can directly do it in the current
+    #       implementations.
+
     load_single_model_weights(model, model_weights, device)
 
     model.to(device)
