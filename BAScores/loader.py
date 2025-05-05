@@ -2,7 +2,7 @@ import itertools
 import os
 import random
 from pathlib import Path
-from typing import Any
+from typing import Any, Optional
 
 import numpy as np
 import pandas as pd
@@ -35,46 +35,61 @@ class SingleSubjectDataloader(Dataset):
 
     def __init__(
         self,
-        train_mode: bool,
+        mode: str,
         in_dir: str,
-        label_dict: dict,
+        label_dict: Optional[dict] = None,
         data_augmentation: bool = False,
     ) -> None:
         super().__init__()
 
+        assert mode in ["train", "evaluate", "inference"]
+        if label_dict is not None:
+            assert (
+                mode != "inference"
+            ), "Can't perform inference with a passed label dict."
+        else:
+            assert (
+                mode == "inference"
+            ), "Can't perform training or evaluation without a label dict."
+
         self.in_dir = Path(in_dir)
         self.data_augmentation = data_augmentation
-        self.train_mode = train_mode
+        self.mode = mode
         self.label_dict = label_dict
         self.images: list = []
         self.img_label: list = []
         self._fetch_images()
-        self._fetch_labels()
+        if self.mode != "inference":
+            self._fetch_labels()
 
     def _fetch_images(self) -> None:
         for img_name in os.listdir(self.in_dir):
             if img_name.endswith(".nii.gz"):
-                # subject_prefix = get_prefix_oasis(img_name)
                 image_path = self.in_dir / img_name
                 self.images.append(image_path)
 
     def _fetch_labels(self) -> None:
         for img in self.images:
-            label = self.label_dict.get(get_prefix(img.name), 0)
+            if self.label_dict is not None:
+                label = self.label_dict.get(get_prefix(img.name), 0)
             self.img_label.append((img, label))
 
     def __len__(self) -> int:
         return len(self.images)
 
     def __getitem__(self, index: int) -> Any:
-        img_path, label = self.img_label[index]
+        if self.mode != "inference":
+            img_path, label = self.img_label[index]
+        else:
+            img_path = self.images[index]
+
         img = tio.ScalarImage(img_path)
         resize = tio.Resize((128, 128, 128))
         img = resize(img)
 
         transforms = []
         if self.data_augmentation:
-            if self.train_mode:
+            if self.mode == "train":
                 if random.randint(0, 2):
                     transforms.append(tio.RandomBlur(2))
                 if random.randint(0, 2):
@@ -96,12 +111,15 @@ class SingleSubjectDataloader(Dataset):
                         )
                     )
         if len(transforms) > 0:
-            pairwise_transforms = tio.Compose(transforms)
-            img = pairwise_transforms(img)
+            single_transforms = tio.Compose(transforms)
+            img = single_transforms(img)
 
         img_tensor = torch.tensor(img.data, dtype=torch.float32)
 
-        return img_tensor, torch.tensor(label, dtype=torch.float32)
+        if self.mode != "inference":
+            return img_tensor, torch.tensor(label, dtype=torch.float32)
+
+        return img_tensor
 
 
 class PairwiseDataloader(Dataset):
@@ -120,15 +138,26 @@ class PairwiseDataloader(Dataset):
 
     def __init__(
         self,
-        train_mode: bool,
+        mode: str,
         in_dir: str,
-        label_dict: dict,
+        label_dict: Optional[dict] = None,
         data_augmentation: bool = False,
     ) -> None:
         super().__init__()
+
+        assert mode in ["train", "evaluate", "inference"]
+        if label_dict is not None:
+            assert (
+                mode != "inference"
+            ), "Can't perform inference with a passed label dict."
+        else:
+            assert (
+                mode == "inference"
+            ), "Can't perform training or evaluation without a label dict."
+
         self.in_dir = Path(in_dir)
         self.data_augmentation = data_augmentation
-        self.train_mode = train_mode
+        self.mode = mode
         self.label_dict = label_dict
         self.image_groups = self._group_images()
         self.pairs = self._create_pairs()
@@ -154,13 +183,17 @@ class PairwiseDataloader(Dataset):
             if len(subject_images) > 1:
                 subject_pairs = list(itertools.combinations(subject_images, 2))
                 for img1, img2 in subject_pairs:
-                    if (
-                        get_prefix(img1.name) in self.label_dict
-                        and get_prefix(img2.name) in self.label_dict
-                    ):
-                        label1 = self.label_dict[get_prefix(img1.name)]
-                        label2 = self.label_dict[get_prefix(img2.name)]
-                        pairs.append((img1, img2, label1, label2))
+                    if self.mode == "inference":
+                        pairs.append((img1, img2))
+                    else:
+                        if self.label_dict is not None:
+                            if (
+                                get_prefix(img1.name) in self.label_dict
+                                and get_prefix(img2.name) in self.label_dict
+                            ):
+                                label1 = self.label_dict[get_prefix(img1.name)]
+                                label2 = self.label_dict[get_prefix(img2.name)]
+                                pairs.append((img1, img2, label1, label2))
 
         return pairs
 
@@ -168,7 +201,10 @@ class PairwiseDataloader(Dataset):
         return len(self.pairs)
 
     def __getitem__(self, index: int) -> Any:
-        img1_path, img2_path, label1, label2 = self.pairs[index]
+        if self.mode == "inference":
+            img1_path, img2_path = self.pairs[index]
+        else:
+            img1_path, img2_path, label1, label2 = self.pairs[index]
         img1 = tio.ScalarImage(img1_path)
         img2 = tio.ScalarImage(img2_path)
 
@@ -179,7 +215,7 @@ class PairwiseDataloader(Dataset):
 
         transforms = []
         if self.data_augmentation:
-            if self.train_mode:
+            if self.mode == "train":
                 if random.randint(0, 2):
                     transforms.append(tio.RandomBlur(2))
                 if random.randint(0, 2):
@@ -208,12 +244,15 @@ class PairwiseDataloader(Dataset):
         img1_tensor = torch.tensor(img1.data, dtype=torch.float32)
         img2_tensor = torch.tensor(img2.data, dtype=torch.float32)
 
-        return (
-            img1_tensor,
-            img2_tensor,
-            torch.tensor(label1, dtype=torch.float32),
-            torch.tensor(label2, dtype=torch.float32),
-        )
+        if self.mode != "inference":
+            return (
+                img1_tensor,
+                img2_tensor,
+                torch.tensor(label1, dtype=torch.float32),
+                torch.tensor(label2, dtype=torch.float32),
+            )
+
+        return img1_tensor, img2_tensor
 
 
 def create_dataloaders(
@@ -247,7 +286,7 @@ def create_dataloaders(
     if pairwise:
         if os.path.isdir(train_dir):
             train_loader = PairwiseDataloader(
-                train_mode=True,
+                mode="train",
                 in_dir=train_dir,
                 label_dict=label_dict,
                 data_augmentation=True,
@@ -257,7 +296,7 @@ def create_dataloaders(
 
         if os.path.isdir(test_dir):
             test_loader = PairwiseDataloader(
-                train_mode=False,
+                mode="evaluate",
                 in_dir=test_dir,
                 label_dict=label_dict,
                 data_augmentation=False,
@@ -267,7 +306,7 @@ def create_dataloaders(
 
         if os.path.isdir(eval_dir):
             eval_loader = PairwiseDataloader(
-                train_mode=False,
+                mode="evaluate",
                 in_dir=eval_dir,
                 label_dict=label_dict,
                 data_augmentation=False,
@@ -278,7 +317,7 @@ def create_dataloaders(
     else:
         if os.path.isdir(train_dir):
             train_loader = SingleSubjectDataloader(
-                train_mode=True,
+                mode="train",
                 in_dir=train_dir,
                 label_dict=label_dict,
                 data_augmentation=True,
@@ -288,7 +327,7 @@ def create_dataloaders(
 
         if os.path.isdir(test_dir):
             test_loader = SingleSubjectDataloader(
-                train_mode=False,
+                mode="evaluate",
                 in_dir=test_dir,
                 label_dict=label_dict,
                 data_augmentation=False,
@@ -298,7 +337,7 @@ def create_dataloaders(
 
         if os.path.isdir(eval_dir):
             eval_loader = SingleSubjectDataloader(
-                train_mode=False,
+                mode="evaluate",
                 in_dir=eval_dir,
                 label_dict=label_dict,
                 data_augmentation=False,

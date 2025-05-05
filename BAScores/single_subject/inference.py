@@ -2,9 +2,9 @@ import os
 
 import pandas as pd
 import torch
-import torchio as tio
+from torch.utils.data import DataLoader
 
-from BAScores.loader import validation_transform
+from BAScores.loader import SingleSubjectDataloader
 from BAScores.utils import load_single_model_weights
 
 
@@ -20,39 +20,35 @@ def inference(
 
     # TODO: Need to create dataloaders for evaluation(without label_dict), i can directly do it in the current
     #       implementations.
-
     load_single_model_weights(model, model_weights, device)
+
+    single_loader = SingleSubjectDataloader(
+        mode="inference",
+        in_dir=in_dir,
+    )
+    dataloader = DataLoader(
+        single_loader,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=os.cpu_count() // 2,  # type: ignore
+        collate_fn=lambda x: torch.utils.data.dataloader.default_collate(x),
+    )
 
     model.to(device)
     model.eval()
 
     y_preds = []
-    indexes = []
-
-    images = []
-    img_indices = []
-
     with torch.no_grad():
-        for idx, img in enumerate(os.listdir(in_dir)):
-            img_path = os.path.join(in_dir, img)
-            img = tio.ScalarImage(img_path)
-            img = validation_transform(img)
-            img_tensor = img.data  # type: ignore
-            img_tensor = img_tensor.unsqueeze(0).float()
+        for idx, imgs in enumerate(dataloader):
+            imgs = imgs.to(device)
+            imgs = imgs.float()
 
-            images.append(img_tensor)
-            img_indices.append(idx)
+            y_pred = model(imgs).squeeze(dim=-1)
+            if len(y_pred) > 1:
+                y_preds.extend(y_pred.cpu().tolist())
+            else:
+                y_preds.append(y_pred.cpu().item())
 
-            if len(images) == batch_size or idx == len(os.listdir(in_dir)) - 1:
-                batch = torch.cat(images, dim=0).to(device)
-                batch_preds = model(batch).squeeze(dim=-1)
-
-                y_preds.extend(batch_preds.tolist())
-                indexes.extend(img_indices)
-
-                images = []
-                img_indices = []
-
-    inference_res = pd.DataFrame({"Index": indexes, "Prediction": y_preds})
+    inference_res = pd.DataFrame({"Prediction": y_preds})
     out_path = os.path.join(out_dir, csv_name)
-    inference_res.to_csv(out_path, index=False)
+    inference_res.to_csv(out_path, index=True)
