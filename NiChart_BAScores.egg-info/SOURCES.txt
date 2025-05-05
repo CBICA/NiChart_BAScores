@@ -10,9 +10,11 @@ BAScores/models/__init__.py
 BAScores/models/pairwise.py
 BAScores/models/resnet3d.py
 BAScores/pairwise/__init__.py
+BAScores/pairwise/evaluate.py
 BAScores/pairwise/inference.py
 BAScores/pairwise/train.py
 BAScores/single_subject/__init__.py
+BAScores/single_subject/evaluate.py
 BAScores/single_subject/inference.py
 BAScores/single_subject/train.py
 NiChart_BAScores.egg-info/PKG-INFO

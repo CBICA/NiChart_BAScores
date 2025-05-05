@@ -22,7 +22,6 @@ setup(
     install_requires=[
         "torch",
         "torchvision",
-        "argparse",
         "torchio",
         "torchmetrics",
         "tqdm",
