@@ -187,22 +187,26 @@ def run_inference(args: Any) -> None:
     assert (
         args.model in AVAILABLE_MODELS.keys()
     ), f"Please provide a currently supported model: {AVAILABLE_MODELS.keys()}"
+    encoder = AVAILABLE_MODELS[args.model]
     if args.model_type == "single":
-        _ = inference_single(
-            model=args.model,
+        # This needs work, see inference_single
+        model = encoder
+        inference_single(
+            model=model,
             model_weights=args.model_weights,
-            eval_dir=args.in_dir,
-            label_dict_csv=args.label_dict,
-            target=args.target,
+            in_dir=args.in_dir,
+            out_dir=args.out_dir,
+            csv_name=args.csv_name,
             device=args.device,
         )
     else:
-        _ = inference_pairwise(
-            model=args.model,
+        model = PairwiseModel3D(encoder=encoder, device=args.device)
+        inference_pairwise(
+            model=model,
             model_weights=args.model_weights,
-            eval_dir=args.in_dir,
-            label_dict_csv=args.label_dict,
-            target=args.target,
+            in_dir=args.in_dir,
+            out_dir=args.out_dir,
+            csv_name=args.csv_name,
             device=args.device,
         )
 
@@ -415,6 +419,38 @@ def main() -> None:
     )
 
     inference.add_argument(
+        "-o",
+        "--out_dir",
+        type=str,
+        default=".",
+        required=False,
+        help="Output directory where the output csv will be saved. Default: Current dir",
+    )
+
+    inference.add_argument(
+        "--csv_name",
+        type=str,
+        default="inference_res.csv",
+        required=False,
+        help="The name of the csv that contains the indexes and values of the predictions. Default: inference_res.csv",
+    )
+
+    inference.add_argument(
+        "--model",
+        type=str,
+        default="resnet18",
+        required=False,
+        help="The encoder that will be used. Currently available: [resnet18, resnet34]",
+    )
+
+    inference.add_argument(
+        "--model_type",
+        type=str,
+        required=True,
+        help="[REQUIRED] Either single or pairwise",
+    )
+
+    inference.add_argument(
         "--model_weights",
         type=str,
         required=True,
@@ -422,16 +458,12 @@ def main() -> None:
     )
 
     inference.add_argument(
-        "--target",
+        "-d",
+        "--device",
         type=str,
-        required=True,
-        help="[REQUIRED] The target column to predict(i.e. Age)",
-    )
-
-    inference.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Provides additional details when set.",
+        default="cuda",
+        required=False,
+        help="The device that evaluation will run with. Default: cuda",
     )
     inference.set_defaults(func=run_inference)
 
