@@ -22,7 +22,6 @@ Description-Content-Type: text/markdown
 License-File: LICENCE
 Requires-Dist: torch
 Requires-Dist: torchvision
-Requires-Dist: argparse
 Requires-Dist: torchio
 Requires-Dist: torchmetrics
 Requires-Dist: tqdm
