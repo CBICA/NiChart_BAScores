@@ -163,6 +163,7 @@ def run_evaluate(args: Any) -> None:
             device=args.device,
             model_weights=args.model_weights,
             verbose=args.verbose,
+            plot_path=None if args.plot_path == "None" else args.plot_path,
         )
     else:
         model = PairwiseModel3D(encoder=encoder, device=args.device)
@@ -172,6 +173,7 @@ def run_evaluate(args: Any) -> None:
             device=args.device,
             model_weights=args.model_weights,
             verbose=args.verbose,
+            plot_path=None if args.plot_path == "None" else args.plot_path,
         )
 
 
@@ -189,7 +191,6 @@ def run_inference(args: Any) -> None:
     ), f"Please provide a currently supported model: {AVAILABLE_MODELS.keys()}"
     encoder = AVAILABLE_MODELS[args.model]
     if args.model_type == "single":
-        # This needs work, see inference_single
         model = encoder
         inference_single(
             model=model,
@@ -198,8 +199,10 @@ def run_inference(args: Any) -> None:
             out_dir=args.out_dir,
             csv_name=args.csv_name,
             device=args.device,
+            batch_size=args.batch_size,
         )
     else:
+        # This needs a bit of work
         model = PairwiseModel3D(encoder=encoder, device=args.device)
         inference_pairwise(
             model=model,
@@ -208,6 +211,7 @@ def run_inference(args: Any) -> None:
             out_dir=args.out_dir,
             csv_name=args.csv_name,
             device=args.device,
+            batch_size=args.batch_size,
         )
 
 
@@ -397,13 +401,21 @@ def main() -> None:
         type=str,
         default="cuda",
         required=False,
-        help="[REQUIRED] The device that evaluation will run with.",
+        help="The device that evaluation will run with. Default: cuda",
     )
 
     evaluate.add_argument(
         "--verbose",
         action="store_true",
         help="Provides additional details when set.",
+    )
+
+    evaluate.add_argument(
+        "--plot_path",
+        type=str,
+        default="None",
+        required=False,
+        help="The path that the prediction vs ground truth plot will be saved. Default: None",
     )
     evaluate.set_defaults(func=run_evaluate)
 
@@ -455,6 +467,14 @@ def main() -> None:
         type=str,
         required=True,
         help="[REQUIRED] The path to the weights that will be used for inference",
+    )
+
+    inference.add_argument(
+        "--batch_size",
+        type=int,
+        required=False,
+        default=16,
+        help="The batches that the images will be splitted into. Default: 16",
     )
 
     inference.add_argument(

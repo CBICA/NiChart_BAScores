@@ -9,7 +9,7 @@ from torchmetrics import (
     R2Score,
 )
 
-from BAScores.utils import load_single_model_weights
+from BAScores.utils import load_single_model_weights, plot_preds_vs_truth
 
 
 def evaluate(
@@ -18,6 +18,7 @@ def evaluate(
     device: str,
     model_weights: Optional[str] = None,
     verbose: bool = False,
+    plot_path: Optional[str] = None,
 ) -> dict:
 
     if model_weights is not None:
@@ -38,6 +39,8 @@ def evaluate(
         "eval_r2": [],
     }
 
+    y_preds = []
+    y_hats = []
     with torch.no_grad():
         for batch, (X, y) in enumerate(dataloader):
             X = X.to(device)
@@ -46,6 +49,13 @@ def evaluate(
             y = y.float()
 
             y_pred = model(X).squeeze(dim=-1)
+
+            if len(y_pred) > 1:
+                y_preds.extend(y_pred.cpu().item())
+                y_hats.extend(y.cpu().tolist())
+            else:
+                y_preds.append(y_pred.cpu().item())
+                y_hats.append(y.cpu().tolist())
 
             mae.update(y_pred, y)
             mse.update(y_pred, y)
@@ -56,6 +66,9 @@ def evaluate(
     eval_stats["eval_mse"] = mse.compute().item()
     eval_stats["eval_nrmse"] = nrmse.compute().item()
     eval_stats["eval_r2"] = r2_score.compute().item()
+
+    if plot_path is not None:
+        plot_preds_vs_truth(y_preds, y_hats, eval_stats, plot_path)
 
     if verbose:
         print(

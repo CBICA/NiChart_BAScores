@@ -1,4 +1,4 @@
-### How to train a single subject model
+### How to perform training
 
 ```bash
 NiChart_BAScores train \

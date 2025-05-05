@@ -12,24 +12,6 @@ from torch.utils.data import DataLoader, Dataset
 
 from BAScores.utils import get_prefix, get_prefix_oasis
 
-training_transform = tio.Compose(
-    [
-        # Partially copied from LILAC paper, for brain age regression
-        tio.Resize((128, 128, 128)),
-        tio.RandomBlur(2),
-        tio.RandomGamma(0.3),
-        tio.RandomFlip(axes=("LR",)),
-        tio.RandomNoise(mean=0, std=2),
-        tio.Affine(
-            scales=(1, 1, 1),
-            degrees=tuple(np.random.uniform(low=-40, high=40, size=3)),
-            translation=tuple(np.random.uniform(low=-10, high=10, size=3)),
-            image_interpolation="linear",
-            default_pad_value="minimum",
-        ),
-    ]
-)
-
 validation_transform = tio.Compose(
     [
         tio.Resize((128, 128, 128)),
@@ -59,6 +41,7 @@ class SingleSubjectDataloader(Dataset):
         data_augmentation: bool = False,
     ) -> None:
         super().__init__()
+
         self.in_dir = Path(in_dir)
         self.data_augmentation = data_augmentation
         self.train_mode = train_mode

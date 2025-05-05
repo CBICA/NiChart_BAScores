@@ -19,6 +19,7 @@ def inference(
     out_dir: str,
     csv_name: str,
     device: str,
+    batch_size: int = 16,
 ) -> None:
 
     load_pairwise_model_weights(model, model_weights, device)

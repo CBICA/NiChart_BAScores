@@ -1,5 +1,7 @@
 from collections import OrderedDict
 
+import matplotlib.pyplot as plt
+import numpy as np
 import torch
 from torch import nn
 
@@ -72,6 +74,37 @@ def load_pairwise_model_weights(
         )  # Allow partial loading if needed
     else:
         model.load_state_dict(pre_state_dict)
+
+
+def plot_preds_vs_truth(
+    y_pred: list, y_hat: list, stats: dict, out_path: str = "."
+) -> None:
+    plt.figure(figsize=(10, 6))
+    plt.scatter(y_pred, y_hat, alpha=0.6, color="blue")
+
+    x_vals = np.linspace(min(y_pred), max(y_pred), 100)
+    plt.plot(x_vals, x_vals, color="red", linestyle="--", label="Correlation")
+    metrics_text = (
+        f"MAE: {stats['eval_mae']:.4f}\n"
+        f"MSE: {stats['eval_mse']:.4f}\n"
+        f"NRMSE: {stats['eval_nrmse']:.4f}\n"
+        f"R²: {stats['eval_r2']:.4f}"
+    )
+    plt.text(
+        0.05,
+        0.95,
+        metrics_text,
+        transform=plt.gca().transAxes,
+        fontsize=12,
+        verticalalignment="top",
+        bbox=dict(boxstyle="round", alpha=0.5, facecolor="white"),
+    )
+    plt.xlabel("Predicted Values", fontsize=14)
+    plt.ylabel("Ground Truth Values", fontsize=14)
+    plt.title("Predictions vs Ground Truth", fontsize=16)
+    plt.legend()
+    plt.grid(alpha=0.3)
+    plt.savefig(out_path, format="png", dpi=300)
 
 
 class EarlyStopper:
