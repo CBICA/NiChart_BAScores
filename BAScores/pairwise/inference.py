@@ -11,7 +11,7 @@ from BAScores.utils import load_pairwise_model_weights
 # from torch.utils.data import DataLoader
 
 
-# TODO: Complete the implementation, i have to create a loader that will push the images in pairs, it's not as simple as the single models
+# TODO: Complete the implementation
 def inference(
     model: torch.nn.Module,
     model_weights: str,
