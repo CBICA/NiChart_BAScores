@@ -1,0 +1,64 @@
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)
+/gpfs/fs001/cbica/home/maggiors/NiChart_BAScores/BAScores/loader.py:119: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.clone().detach() or sourceTensor.clone().detach().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  img_tensor = torch.tensor(img.data, dtype=torch.float32)

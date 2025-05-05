@@ -1,0 +1,2 @@
+[console_scripts]
+NiChart_BAScores = BAScores.__main__:main

@@ -1,0 +1,8 @@
+torch
+torchvision
+argparse
+torchio
+torchmetrics
+tqdm
+numpy
+pandas

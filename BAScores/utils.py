@@ -1,0 +1,97 @@
+from collections import OrderedDict
+
+import torch
+from torch import nn
+
+
+def get_prefix_oasis(img_name: str) -> str:
+    """
+    TODO: This one was specific, but will change
+    """
+    return str(img_name[: len(img_name) - 37])
+
+
+def get_prefix(img_name: str) -> str:
+    """
+    Returns the prefix(the name or label) of the images. Note that, the images
+    have a suffix of .nii.gz and the dlicv and LPS orientation labels.
+    """
+    return str(img_name[: len(img_name) - 28])
+
+
+def load_single_model_weights(
+    model: nn.Module, model_weights: str, device: str
+) -> None:
+    pre_state_dict = torch.load(model_weights, map_location=torch.device(device))
+
+    model_state_keys = set(model.state_dict().keys())
+    # Have to look at this a bit more
+    # checkpoint_keys = set(pre_state_dict.keys())
+
+    new_state_dict = OrderedDict()
+    for k, v in pre_state_dict.items():
+        if k.startswith("module."):
+            new_k = k.replace("module.", "")
+        else:
+            new_k = k
+        if new_k in model_state_keys:
+            new_state_dict[new_k] = v
+        else:
+            print(
+                f"Warning: Key '{new_k}' from checkpoint does not match any key in the model."
+            )
+
+    model.load_state_dict(new_state_dict, strict=False)
+
+
+def load_pairwise_model_weights(
+    model: nn.Module, model_weights: str, device: str
+) -> None:
+    pre_state_dict = torch.load(model_weights, map_location=torch.device(device))
+
+    model_state_keys = set(model.state_dict().keys())
+    checkpoint_keys = set(pre_state_dict.keys())
+
+    if model_state_keys != checkpoint_keys:
+        new_state_dict = OrderedDict()
+
+        for k, v in pre_state_dict.items():
+            if k.startswith("module."):  # If saved with DataParallel
+                new_k = k.replace("module.", "")
+            elif not any(
+                k.startswith(prefix) for prefix in ["net.", "net.0.", "net.0.net."]
+            ):
+                new_k = "net." + k
+            else:
+                new_k = k
+
+            new_state_dict[new_k] = v
+
+        model.load_state_dict(
+            new_state_dict, strict=False
+        )  # Allow partial loading if needed
+    else:
+        model.load_state_dict(pre_state_dict)
+
+
+class EarlyStopper:
+    """
+    Performs early stopping as PyTorch doesn't have an implemented one
+    """
+
+    def __init__(self, patience: int = 1, min_delta: float = 0.0) -> None:
+        self.patience = patience
+        self.min_delta = min_delta
+        self.counter = 0
+        self.min_validation_loss = float("inf")
+
+    def early_stop(self, validation_loss: float) -> bool:
+        if validation_loss < self.min_validation_loss:
+            self.min_validation_loss = validation_loss
+            self.counter = 0
+        elif validation_loss > (self.min_validation_loss + self.min_delta):
+            self.counter += 1
+            if self.counter >= self.patience:
+                return True
+
+        return False
