@@ -1,4 +1,4 @@
-# NiChart Brain Aging Scores
+# NiChart Brain Ageing Scores
 
 ## Overview
 NiChart_BAScores is an integrated NiChart package that helps users train/evaluate models or perform inference using our pre-trained models.
