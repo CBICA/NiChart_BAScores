@@ -21,6 +21,8 @@ NiChart_BAScores train \
                  --model resnet18 \
                  --target Age \
 ```
+> [!Note]
+> Note that the niftii files must have the following suffix corresponding that they are preprocessed as it should: `_T1_LPS_dlicv_aligned.nii.gz` otherwise, the preprocessing pipeline must be applied first
 
 ### Evaluation
 Evaluation is performed by default as the last step in training, but, the user has the option to select any weight and model and evaluate it on a dataset. A simple example is the following:
