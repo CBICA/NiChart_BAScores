@@ -13,4 +13,11 @@ NiChart_BAScores inference \
                  --batch_size 256 \
 ```
 
-The above will perform inference as we have the "inference" command in the CLI, it will search for all the raw niftii images and collect them in batches(`batch_size`). The output will be a csv file with the predicted values and indexes.
+- in_dir: The input directory that contains the train, test and eval folders with LPS oriented, DLICV preprocessed T1 images
+- out_dir: The output directory that the csv file that contains the predicted results with name: `csv_name` will be saved
+- csv_name: See above
+- device: Either cuda, mps or cpu
+- model: The type of backbone, currently supported: [resnet18, resnet34]
+- model_type: Either single or pairwise
+- model_weights: The path to a .pth file that contains the weights of the selected model
+- batch_size: The batch size that the loader will use. This will make things faster but will increase the GPU overhead

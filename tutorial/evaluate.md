@@ -13,4 +13,14 @@ NiChart_BAScores evaluate \
                  --plot_path y_pred_vs_y_hat.png
 ```
 
-The above will perform evaluation on the images of the input directory as we have the "evaluate" command in the CLI. Then, it will search for the `eval` folder inside the `in_dir` and it will print the values of the metrics we use on the input images. You can select which model you want with the `model` argument and the model type with the `model_type`. Last but not least, you can specify a path where a y_pred vs y_hat plot will be saved, if it's not set, then the plot won't be created. The evaluate function is used in training as well - as the last step - so you have to provide the model weights to only perform evaluation.
+- in_dir: The input directory that contains the train, test and eval folders with LPS oriented, DLICV preprocessed T1 images
+- model: The type of backbone, currently supported: [resnet18, resnet34]
+- model_type: Either single or pairwise
+- model_weights: The path to a .pth file that contains the weights of the selected model
+- label_dict: The path to a .csv file that must contain a column with the MRID's and a column with the values of the targets
+- target: The name of the target value(same as in the label dict)
+- device: Either cuda, mps or cpu
+- verbose: Set if you want to output information about training
+- plot_path: A path that a predictions vs ground truth plot will be saved(with all the metrics)
+
+
