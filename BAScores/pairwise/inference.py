@@ -19,6 +19,7 @@ def inference(
 ) -> None:
 
     load_pairwise_model_weights(model, model_weights, device)
+
     pairwise_loader = PairwiseDataloader(
         mode="inference",
         in_dir=in_dir,

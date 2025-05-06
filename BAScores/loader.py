@@ -23,12 +23,12 @@ class SingleSubjectDataloader(Dataset):
     """
     Class for the SingleSubject Dataloader. Returns the input tensor with it's label(as a torch.tensor)
 
-    :param train_mode: True for train dataloader and False otherwise
-    :type train_mode: bool
+    :param mode: train, evaluate or inference
+    :type mode: str
     :param in_dir: The input directory that contains train/ test/ and eval/ folders
     :type in_dir: str
     :param label_dict: A dictionary that maps MRID to target value
-    :type label_dict: dict
+    :type label_dict: Optional[dict]
     :param data_augmentation: True if you want data augmentation to be applied, False otherwise
     :type data_augmentation: bool
     """
@@ -126,12 +126,12 @@ class PairwiseDataloader(Dataset):
     """
     Class for the Pairwise Dataloader. Returns the input tensors with theri labels(as a torch.tensor)
 
-    :param train_mode: True for train dataloader and False otherwise
-    :type train_mode: bool
+    :param mode: train, evaluate or inference
+    :type mode: str
     :param in_dir: The input directory that contains train/ test/ and eval/ folders
     :type in_dir: str
     :param label_dict: A dictionary that maps MRID to target value
-    :type label_dict: dict
+    :type label_dict: Optional[dict]
     :param data_augmentation: True if you want data augmentation to be applied, False otherwise
     :type data_augmentation: bool
     """
