@@ -215,6 +215,16 @@ def run_inference(args: Any) -> None:
         )
 
 
+def run_install_weights(args: Any) -> None:
+    from huggingface_hub import hf_hub_download
+
+    repo_id = "nichart/BAScores"
+    weights = f"BAScores_brain_{args.target}_{args.model_type}_{args.model}.pth"
+    hf_hub_download(repo_id=repo_id, filename=weights)
+
+    print(f"{weights} installed successfully")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(
         prog="NiChart_BASscores",
@@ -486,6 +496,32 @@ def main() -> None:
         help="The device that evaluation will run with. Default: cuda",
     )
     inference.set_defaults(func=run_inference)
+
+    install_weights = subparsers.add_parser(
+        "install_weights", help="Selects which weight to install"
+    )
+
+    install_weights.add_argument(
+        "--model",
+        type=str,
+        required=True,
+        help="[REQUIRED] The name of the encoder(example: resnet18).",
+    )
+
+    install_weights.add_argument(
+        "--model_type",
+        type=str,
+        required=True,
+        help="[REQUIRED] Either single or pairwise",
+    )
+
+    install_weights.add_argument(
+        "--target",
+        type=str,
+        required=True,
+        help="[REQUIRED] The target column to predict(i.e. Age)",
+    )
+    install_weights.set_defaults(func=run_install_weights)
 
     args = parser.parse_args()
     args.func(args)
