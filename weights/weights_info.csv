@@ -1,2 +1,2 @@
 name,target,mae,mse,nrmse,r2
-BAScores_brain_age_single_BL_AdamW,Age,3.1714,16.7246,0.0676,0.9126
+BAScores_brain_age_single,Age,3.1714,16.7246,0.0676,0.9126
