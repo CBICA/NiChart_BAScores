@@ -13,7 +13,7 @@ class PairwiseModel3D(nn.Module):
     def forward(self, x1: torch.Tensor, x2: torch.Tensor) -> torch.Tensor:
         x1 = self.net[0](x1)
         x2 = self.net[0](x2)
-        f = x1 - x2
+        f = x2 - x1
 
         out = torch.cat((f, x1, x2), dim=1)
         return self.net[1](out)

@@ -40,7 +40,7 @@ def train_step(
         y_pred = model(I1, I2).squeeze(dim=-1)
 
         # loss computation
-        loss = loss_fn(y_pred, y1 - y2)
+        loss = loss_fn(y_pred, y2 - y1)
 
         # loss backward
         loss.backward()
@@ -49,9 +49,9 @@ def train_step(
         optimizer.step()
 
         stats["train_mae"] += loss.item()
-        mse.update(y_pred, y1 - y2)
-        nrmse.update(y_pred, y1 - y2)
-        r2_score.update(y_pred, y1 - y2)
+        mse.update(y_pred, y2 - y1)
+        nrmse.update(y_pred, y2 - y1)
+        r2_score.update(y_pred, y2 - y1)
 
     stats["train_mae"] = stats["train_mae"] / float(len(dataloader))
     stats["train_mse"] = mse.compute().item()
@@ -87,12 +87,12 @@ def test_step(
             y2 = y2.float()
             test_pred_logits = model(I1, I2).squeeze(dim=-1)
 
-            loss = loss_fn(test_pred_logits, y1 - y2)
+            loss = loss_fn(test_pred_logits, y2 - y1)
 
             stats["test_mae"] += loss.item()
-            mse.update(test_pred_logits, y1 - y2)
-            nrmse.update(test_pred_logits, y1 - y2)
-            r2_score.update(test_pred_logits, y1 - y2)
+            mse.update(test_pred_logits, y2 - y1)
+            nrmse.update(test_pred_logits, y2 - y1)
+            r2_score.update(test_pred_logits, y2 - y1)
 
     stats["test_mae"] = stats["test_mae"] / float(len(dataloader))
     stats["test_mse"] = mse.compute().item()

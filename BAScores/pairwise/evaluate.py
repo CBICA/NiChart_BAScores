@@ -58,15 +58,15 @@ def evaluate(
 
             if len(y_pred) > 1:
                 y_preds.extend(y_pred.cpu().item())
-                y_hats.extend((y1 - y2).cpu().tolist())
+                y_hats.extend((y2 - y1).cpu().tolist())
             else:
                 y_preds.append(y_pred.cpu().item())
-                y_hats.append((y1 - y2).cpu().tolist())
+                y_hats.append((y2 - y1).cpu().tolist())
 
-            mae.update(y_pred, y1 - y2)
-            mse.update(y_pred, y1 - y2)
-            nrmse.update(y_pred, y1 - y2)
-            r2_score.update(y_pred, y1 - y2)
+            mae.update(y_pred, y2 - y1)
+            mse.update(y_pred, y2 - y1)
+            nrmse.update(y_pred, y2 - y1)
+            r2_score.update(y_pred, y2 - y1)
 
     eval_stats["eval_mae"] = mae.compute().item()
     eval_stats["eval_mse"] = mse.compute().item()
