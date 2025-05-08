@@ -8,6 +8,7 @@ from torchmetrics import (
     NormalizedRootMeanSquaredError,
     R2Score,
 )
+from typing_extensions import Literal
 
 from BAScores.utils import load_single_model_weights, plot_preds_vs_truth
 
@@ -15,7 +16,7 @@ from BAScores.utils import load_single_model_weights, plot_preds_vs_truth
 def evaluate(
     model: torch.nn.Module,
     dataloader: DataLoader,
-    device: str,
+    device: Literal["cuda", "mps", "cpu"] = "cuda",
     model_weights: Optional[str] = None,
     verbose: bool = False,
     plot_path: Optional[str] = None,

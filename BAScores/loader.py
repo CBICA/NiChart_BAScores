@@ -9,6 +9,7 @@ import pandas as pd
 import torch
 import torchio as tio
 from torch.utils.data import DataLoader, Dataset
+from typing_extensions import Literal
 
 from BAScores.utils import get_prefix, get_prefix_oasis
 
@@ -35,7 +36,7 @@ class SingleSubjectDataloader(Dataset):
 
     def __init__(
         self,
-        mode: str,
+        mode: Literal["train", "evaluate", "inference"],
         in_dir: str,
         label_dict: Optional[dict] = None,
         data_augmentation: bool = False,
@@ -138,7 +139,7 @@ class PairwiseDataloader(Dataset):
 
     def __init__(
         self,
-        mode: str,
+        mode: Literal["train", "evaluate", "inference"],
         in_dir: str,
         label_dict: Optional[dict] = None,
         data_augmentation: bool = False,

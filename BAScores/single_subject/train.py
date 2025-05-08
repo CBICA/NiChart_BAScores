@@ -4,6 +4,7 @@ import torch
 from torch.utils.data import DataLoader
 from torchmetrics import MeanSquaredError, NormalizedRootMeanSquaredError, R2Score
 from tqdm.auto import tqdm
+from typing_extensions import Literal
 
 from BAScores.single_subject.evaluate import evaluate
 from BAScores.utils import EarlyStopper
@@ -14,7 +15,7 @@ def train_step(
     dataloader: DataLoader,
     loss_fn: torch.nn.Module,
     optimizer: torch.optim.Optimizer,
-    device: str,
+    device: Literal["cuda", "mps", "cpu"] = "cuda",
 ) -> dict:
 
     model.train()
@@ -66,7 +67,7 @@ def test_step(
     model: torch.nn.Module,
     dataloader: DataLoader,
     loss_fn: torch.nn.Module,
-    device: str,
+    device: Literal["cuda", "mps", "cpu"] = "cuda",
 ) -> dict:
 
     # eval mode
@@ -107,7 +108,7 @@ def train(
     loss_fn: torch.nn.Module,
     epochs: int,
     patience: int,
-    device: str,
+    device: Literal["cuda", "mps", "cpu"] = "cuda",
     target_dir: str = ".",
     model_name: str = "NiChart_BAScores_best.pth",
     verbose: bool = False,

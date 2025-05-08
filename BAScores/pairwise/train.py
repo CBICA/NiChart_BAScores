@@ -5,6 +5,7 @@ import torch
 from torch.utils.data import DataLoader
 from torchmetrics import MeanSquaredError, NormalizedRootMeanSquaredError, R2Score
 from tqdm.auto import tqdm
+from typing_extensions import Literal
 
 from BAScores.pairwise.evaluate import evaluate
 from BAScores.utils import EarlyStopper
@@ -15,7 +16,7 @@ def train_step(
     dataloader: DataLoader,
     loss_fn: torch.nn.Module,
     optimizer: torch.optim.Optimizer,
-    device: str,
+    device: Literal["cuda", "mps", "cpu"] = "cuda",
 ) -> Dict:
 
     model.train(True)
@@ -64,7 +65,7 @@ def test_step(
     model: torch.nn.Module,
     dataloader: DataLoader,
     loss_fn: torch.nn.Module,
-    device: str,
+    device: Literal["cuda", "mps", "cpu"] = "cuda",
 ) -> Dict:
 
     # eval mode
@@ -91,7 +92,7 @@ def test_step(
             stats["test_mae"] += loss.item()
             mse.update(test_pred_logits, y1 - y2)
             nrmse.update(test_pred_logits, y1 - y2)
-            r2_score.udpate(test_pred_logits, y1 - y2)
+            r2_score.update(test_pred_logits, y1 - y2)
 
     stats["test_mae"] = stats["test_mae"] / float(len(dataloader))
     stats["test_mse"] = mse.compute().item()
@@ -110,7 +111,7 @@ def train(
     loss_fn: torch.nn.Module,
     epochs: int,
     patience: int,
-    device: str,
+    device: Literal["cuda", "mps", "cpu"] = "cuda",
     target_dir: str = ".",
     model_name: str = "NiChart_BAScores_best.pth",
     verbose: bool = False,

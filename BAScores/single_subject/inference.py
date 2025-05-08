@@ -3,6 +3,7 @@ import os
 import pandas as pd
 import torch
 from torch.utils.data import DataLoader
+from typing_extensions import Literal
 
 from BAScores.loader import SingleSubjectDataloader
 from BAScores.utils import load_single_model_weights
@@ -14,7 +15,7 @@ def inference(
     in_dir: str,
     out_dir: str,
     csv_name: str,
-    device: str,
+    device: Literal["cuda", "mps", "cpu"] = "cuda",
     batch_size: int = 16,
 ) -> None:
 
