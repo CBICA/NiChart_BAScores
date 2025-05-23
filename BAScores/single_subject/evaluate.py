@@ -44,12 +44,10 @@ def evaluate(
     y_hats = []
     with torch.no_grad():
         for batch, (X, y) in enumerate(dataloader):
-            X = X.to(device)
-            y = y.to(device)
-            X = X.float()
-            y = y.float()
+            X, y = X.to(device), y.to(device)
+            X, y = X.float(), y.float()
 
-            y_pred = model(X).squeeze(dim=-1)
+            y_pred = model(X).squeeze()
 
             if len(y_pred) > 1:
                 y_preds.extend(y_pred.cpu().item())
