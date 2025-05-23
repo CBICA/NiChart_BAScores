@@ -47,14 +47,14 @@ def evaluate(
             X, y = X.to(device), y.to(device)
             X, y = X.float(), y.float()
 
-            y_pred = model(X).squeeze()
+            y_pred = model(X).squeeze(dim=-1)
 
             if len(y_pred) > 1:
-                y_preds.extend(y_pred.cpu().item())
+                y_preds.extend(y_pred.cpu().tolist())
                 y_hats.extend(y.cpu().tolist())
             else:
                 y_preds.append(y_pred.cpu().item())
-                y_hats.append(y.cpu().tolist())
+                y_hats.append(y.cpu().item())
 
             mae.update(y_pred, y)
             mse.update(y_pred, y)

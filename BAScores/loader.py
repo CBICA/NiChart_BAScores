@@ -377,7 +377,4 @@ def create_dataloaders(
     else:
         eval_dataloader = None
 
-    print(
-        f"Created: {len(train_dataloader)}, {len(test_dataloader)}, {len(eval_dataloader)}"
-    )
     return train_dataloader, test_dataloader, eval_dataloader
