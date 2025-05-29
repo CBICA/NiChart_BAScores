@@ -62,6 +62,15 @@ def run_train(args: Any) -> None:
     assert args.epochs > 0
     assert args.patience >= 0
 
+    assert args.mode in [
+        "regression",
+        "multiclass",
+        "binary",
+    ]
+    if args.mode != "regression":
+        assert (
+            args.num_classes > 0
+        ), "Please set the number of classes if you perform classification"
     assert args.model_type in [
         "single",
         "pairwise",
@@ -77,7 +86,12 @@ def run_train(args: Any) -> None:
     ), f"Please provide a currently supported model: {AVAILABLE_MODELS.keys()}"
 
     encoder = AVAILABLE_MODELS[args.model]
-    loss_fn = torch.nn.L1Loss(reduction="mean")  # MAE loss
+    if args.mode == "regression":
+        loss_fn = torch.nn.L1Loss(reduction="mean")  # MAE loss
+    elif args.mode == "multiclass":
+        loss_fn = torch.nn.CrossEntropyLoss()
+    else:  # binary
+        loss_fn = torch.nn.BCEWithLogitsLoss()
 
     train_dataloader, test_dataloader, eval_dataloader = create_dataloaders(
         in_dir=args.in_dir,
@@ -97,6 +111,7 @@ def run_train(args: Any) -> None:
 
         _ = train_single(
             model=model,
+            mode=args.mode,
             train_dataloader=train_dataloader,
             test_dataloader=test_dataloader,
             eval_dataloader=eval_dataloader,
@@ -104,6 +119,7 @@ def run_train(args: Any) -> None:
             loss_fn=loss_fn,
             epochs=args.epochs,
             patience=args.patience,
+            num_classes=None if args.num_classes == -1 else args.num_classes,
             device=args.device,
             target_dir=args.out_dir,
             model_name=args.model_name,
@@ -159,7 +175,9 @@ def run_evaluate(args: Any) -> None:
         model = encoder
         _ = evaluate_single(
             model=model,
+            mode=args.mode,
             dataloader=eval_dataloader,
+            num_classes=None if args.num_classes == -1 else args.num_classes,
             device=args.device,
             model_weights=args.model_weights,
             verbose=args.verbose,
@@ -252,6 +270,21 @@ def main() -> None:
         required=True,
         help="[REQUIRED] The name of the .csv file that contains information about your dataset. \
               The .csv file must contain MRID and target columns that corresponds to the continuous target value of the specific MRID.",
+    )
+
+    train.add_argument(
+        "--mode",
+        type=str,
+        required=True,
+        help="[REQUIRED] Either regression, multiclass or binary",
+    )
+
+    train.add_argument(
+        "--num_classes",
+        type=int,
+        required=False,
+        default=-1,
+        help="Only if mode != regression. Set the number of classes",
     )
 
     train.add_argument(
@@ -374,6 +407,21 @@ def main() -> None:
         default="resnet18",
         required=False,
         help="The encoder that will be used. Currently available: [resnet18, resnet34]",
+    )
+
+    evaluate.add_argument(
+        "--mode",
+        type=str,
+        required=True,
+        help="[REQUIRED] Either regression, multiclass or binary",
+    )
+
+    evaluate.add_argument(
+        "--num_classes",
+        type=int,
+        required=False,
+        default=-1,
+        help="Only if mode != regression. Set the number of classes",
     )
 
     evaluate.add_argument(

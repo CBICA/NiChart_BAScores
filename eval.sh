@@ -9,11 +9,11 @@
 
 NiChart_BAScores evaluate \
                  --in_dir ../Datasets/ADNI/ad_regression \
-                 --model resnet18 \
+                 --model resnet34 \
                  --model_type single \
-                 --model_weights weights/BAScores_brain_age_SPARE-BA-Harmonized_AdamW_highl2.pth \
+                 --model_weights ../BAScores_brain_age_SPARE-BA-Harmonized_AdamW_highl2_resnet34.pth \
                  --label_dict ../Datasets/ADNI/out_list_ALL.csv \
                  --target Age \
                  --device cuda \
                  --verbose \
-                 --plot_path y_pred_vs_y_hat_AD.png
+                 --plot_path y_pred_vs_y_hat_resnet34_AD.png
