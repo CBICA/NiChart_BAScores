@@ -5,6 +5,8 @@ import torch
 from torch.utils.data import DataLoader
 from torchmetrics import (
     AUROC,
+    Accuracy,
+    ConfusionMatrix,
     F1Score,
     MeanSquaredError,
     NormalizedRootMeanSquaredError,
@@ -55,6 +57,9 @@ def train_step(
 
         if mode == "multiclass":
             assert num_classes is not None
+            acc = Accuracy(task=mode, average="macro", num_classes=num_classes).to(
+                device
+            )
             auc = AUROC(task=mode, average="macro", num_classes=num_classes).to(device)
             recall = Recall(task=mode, average="macro", num_classes=num_classes).to(
                 device
@@ -69,6 +74,7 @@ def train_step(
                 device
             )
         else:
+            acc = Accuracy(task=mode).to(device)
             auc = AUROC(task=mode).to(device)
             recall = Recall(task=mode).to(device)
             precision = Precision(task=mode).to(device)
@@ -100,12 +106,17 @@ def train_step(
             nrmse.update(y_pred, y)
             r2_score.update(y_pred, y)
         else:
-            stats["train_acc"] += loss.item()
-            auc.update(y_pred, y)
-            recall.update(y_pred, y)
-            precision.update(y_pred, y)
-            specificity.update(y_pred, y)
-            f1_score.update(y_pred, y)
+            y_pred_classes = (
+                (torch.sigmoid(y_pred) > 0.5).float()
+                if mode == "binary"
+                else torch.argmax(y_pred, dim=1)
+            )
+            acc.update(y_pred_classes, y)
+            auc.update(y_pred_classes, y)
+            recall.update(y_pred_classes, y)
+            precision.update(y_pred_classes, y)
+            specificity.update(y_pred_classes, y)
+            f1_score.update(y_pred_classes, y)
 
     if mode == "regression":
         stats["train_mae"] = stats["train_mae"] / float(len(dataloader))
@@ -113,7 +124,7 @@ def train_step(
         stats["train_nrmse"] = nrmse.compute().item()
         stats["train_r2"] = r2_score.compute().item()
     else:
-        stats["train_acc"] = stats["train_acc"] / float(len(dataloader))
+        stats["train_acc"] = acc.compute().item()
         stats["train_auc"] = auc.compute().item()
         stats["train_recall"] = recall.compute().item()
         stats["train_precision"] = precision.compute().item()
@@ -145,13 +156,17 @@ def test_step(
             "test_acc": 0.0,
             "test_auc": 0.0,
             "test_recall": 0.0,
-            "testprecision": 0.0,
+            "test_precision": 0.0,
             "test_specificity": 0.0,
             "test_f1": 0.0,
+            "test_confussion_matrix": [],  # type: ignore
         }
 
         if mode == "multiclass":
             assert num_classes is not None
+            acc = Accuracy(task=mode, average="macro", num_classes=num_classes).to(
+                device
+            )
             auc = AUROC(task=mode, average="macro", num_classes=num_classes).to(device)
             recall = Recall(task=mode, average="macro", num_classes=num_classes).to(
                 device
@@ -165,12 +180,15 @@ def test_step(
             f1_score = F1Score(task=mode, average="macro", num_classes=num_classes).to(
                 device
             )
+            confmat = ConfusionMatrix(task=mode, num_classes=num_classes).to(device)
         else:
+            acc = Accuracy(task=mode).to(device)
             auc = AUROC(task=mode).to(device)
             recall = Recall(task=mode).to(device)
             precision = Precision(task=mode).to(device)
             specificity = Specificity(task=mode).to(device)
             f1_score = F1Score(task=mode).to(device)
+            confmat = ConfusionMatrix(task=mode).to(device)
 
     with torch.no_grad():
         for X, y in dataloader:
@@ -187,12 +205,18 @@ def test_step(
                 nrmse.update(test_pred, y)
                 r2_score.update(test_pred, y)
             else:
-                stats["test_acc"] += loss.item()
-                auc.update(test_pred, y)
-                recall.update(test_pred, y)
-                precision.update(test_pred, y)
-                specificity.update(test_pred, y)
-                f1_score.update(test_pred, y)
+                y_pred_classes = (
+                    (torch.sigmoid(test_pred) > 0.5).float()
+                    if mode == "binary"
+                    else torch.argmax(test_pred, dim=1)
+                )
+                acc.update(y_pred_classes, y)
+                auc.update(y_pred_classes, y)
+                recall.update(y_pred_classes, y)
+                precision.update(y_pred_classes, y)
+                specificity.update(y_pred_classes, y)
+                f1_score.update(y_pred_classes, y)
+                confmat.update(y_pred_classes, y)
 
     if mode == "regression":
         stats["test_mae"] = stats["test_mae"] / float(len(dataloader))
@@ -200,12 +224,13 @@ def test_step(
         stats["test_nrmse"] = nrmse.compute().item()
         stats["test_r2"] = r2_score.compute().item()
     else:
-        stats["test_acc"] = stats["test_acc"] / float(len(dataloader))
+        stats["test_acc"] = acc.compute().item()
         stats["test_auc"] = auc.compute().item()
         stats["test_recall"] = recall.compute().item()
         stats["test_precision"] = precision.compute().item()
         stats["test_specificity"] = specificity.compute().item()
         stats["test_f1"] = f1_score.compute().item()
+        stats["test_confussion_matrix"] = confmat.compute().cpu().numpy()
 
     return stats
 
@@ -260,6 +285,7 @@ def train(
             "test_precision": [],
             "test_specificity": [],
             "test_f1": [],
+            "test_confussion_matrix": [],
             "eval_acc": 0.0,
             "eval_auc": 0.0,
             "eval_recall": 0.0,
@@ -354,7 +380,8 @@ def train(
                     f"test_recall: {test_stats['test_recall']:.4f} | "
                     f"test_precision: {test_stats['test_precision']:.4f} | "
                     f"test_specificity: {test_stats['test_specificity']:.4f} | "
-                    f"test_f1: {test_stats['test_f1']:.4f}"
+                    f"test_f1: {test_stats['test_f1']:.4f} | "
+                    f"test_confussion_matrix: {test_stats['test_confussion_matrix']}"
                 )
 
             results["train_acc"].append(train_stats["train_acc"])

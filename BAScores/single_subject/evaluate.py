@@ -78,6 +78,7 @@ def evaluate(
                 device
             )
         else:
+            acc = Accuracy(task=mode).to(device)
             auc = AUROC(task=mode).to(device)
             recall = Recall(task=mode).to(device)
             precision = Precision(task=mode).to(device)
@@ -106,12 +107,17 @@ def evaluate(
                 nrmse.update(y_pred, y)
                 r2_score.update(y_pred, y)
             else:
-                acc.update(y_pred, y)
-                auc.update(y_pred, y)
-                recall.update(y_pred, y)
-                precision.update(y_pred, y)
-                specificity.update(y_pred, y)
-                f1_score.update(y_pred, y)
+                y_pred_classes = (
+                    (torch.sigmoid(y_pred) > 0.5).float()
+                    if mode == "binary"
+                    else torch.argmax(y_pred, dim=1)
+                )
+                acc.update(y_pred_classes, y)
+                auc.update(y_pred_classes, y)
+                recall.update(y_pred_classes, y)
+                precision.update(y_pred_classes, y)
+                specificity.update(y_pred_classes, y)
+                f1_score.update(y_pred_classes, y)
 
     if mode == "regression":
         eval_stats["eval_mae"] = mae.compute().item()
