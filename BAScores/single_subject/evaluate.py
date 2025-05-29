@@ -3,7 +3,7 @@ from typing import Optional
 import torch
 from torch.utils.data import DataLoader
 from torchmetrics import (
-    AUCROC,
+    AUROC,
     Accuracy,
     F1Score,
     MeanAbsoluteError,
@@ -50,7 +50,6 @@ def evaluate(
         nrmse = NormalizedRootMeanSquaredError().to(device)
         r2_score = R2Score().to(device)
     else:
-        assert num_classes is not None
         eval_stats = {
             "eval_acc": [],
             "eval_auc": [],
@@ -61,10 +60,11 @@ def evaluate(
         }
 
         if mode == "multiclass":
+            assert num_classes is not None
             acc = Accuracy(task=mode, average="macro", num_classes=num_classes).to(
                 device
             )
-            auc = AUCROC(task=mode, average="macro", num_classes=num_classes).to(device)
+            auc = AUROC(task=mode, average="macro", num_classes=num_classes).to(device)
             recall = Recall(task=mode, average="macro", num_classes=num_classes).to(
                 device
             )
@@ -78,7 +78,7 @@ def evaluate(
                 device
             )
         else:
-            auc = AUCROC(task=mode).to(device)
+            auc = AUROC(task=mode).to(device)
             recall = Recall(task=mode).to(device)
             precision = Precision(task=mode).to(device)
             specificity = Specificity(task=mode).to(device)

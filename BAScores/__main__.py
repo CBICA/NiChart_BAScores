@@ -48,14 +48,6 @@ def select_optimizer(
 
 def run_train(args: Any) -> None:
 
-    AVAILABLE_MODELS = {
-        "resnet18": ResNet3D(
-            arch=((2, 64), (2, 128), (2, 256), (2, 512)), device=args.device
-        ),
-        "resnet34": ResNet3D(
-            arch=((3, 64), (4, 128), (6, 256), (3, 512)), device=args.device
-        ),
-    }  # TODO: Support more CNN architectures
     assert args.lr > 0.0
     assert args.weight_decay >= 0.0
     assert args.batch_size > 0
@@ -67,10 +59,12 @@ def run_train(args: Any) -> None:
         "multiclass",
         "binary",
     ]
-    if args.mode != "regression":
+    if args.mode == "multiclass":
         assert (
             args.num_classes > 0
-        ), "Please set the number of classes if you perform classification"
+        ), "Please set the number of classes if you perform multiclass classification"
+    if args.mode == "regression":
+        assert args.num_classes == -1
     assert args.model_type in [
         "single",
         "pairwise",
@@ -80,6 +74,19 @@ def run_train(args: Any) -> None:
         "mps",
         "cpu",
     ], "Please provide one of the following devices: [cuda, mps, cpu]"
+
+    AVAILABLE_MODELS = {
+        "resnet18": ResNet3D(
+            arch=((2, 64), (2, 128), (2, 256), (2, 512)),
+            num_classes=1 if args.num_classes == -1 else args.num_classes,
+            device=args.device,
+        ),
+        "resnet34": ResNet3D(
+            arch=((3, 64), (4, 128), (6, 256), (3, 512)),
+            num_classes=1 if args.num_classes == -1 else args.num_classes,
+            device=args.device,
+        ),
+    }  # TODO: Support more CNN architectures
 
     assert (
         args.model in AVAILABLE_MODELS.keys()
@@ -152,12 +159,23 @@ def run_train(args: Any) -> None:
 
 def run_evaluate(args: Any) -> None:
 
+    if args.mode == "multiclass":
+        assert (
+            args.num_classes > 0
+        ), "Please set the number of classes if you perform multiclass classification"
+    if args.mode == "regression":
+        assert args.num_classes == -1
+
     AVAILABLE_MODELS = {
         "resnet18": ResNet3D(
-            arch=((2, 64), (2, 128), (2, 256), (2, 512)), device=args.device
+            arch=((2, 64), (2, 128), (2, 256), (2, 512)),
+            num_classes=1 if args.num_classes == -1 else args.num_classes,
+            device=args.device,
         ),
         "resnet34": ResNet3D(
-            arch=((3, 64), (4, 128), (6, 256), (3, 512)), device=args.device
+            arch=((3, 64), (4, 128), (6, 256), (3, 512)),
+            num_classes=1 if args.num_classes == -1 else args.num_classes,
+            device=args.device,
         ),
     }  # TODO: Support more CNN architectures
     assert (

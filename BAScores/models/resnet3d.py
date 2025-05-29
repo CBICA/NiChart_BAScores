@@ -56,7 +56,7 @@ class Residual(nn.Module):
 
 
 class ResNet3D(nn.Module):
-    def __init__(self, arch: Any, device: str) -> None:
+    def __init__(self, arch: Any, device: str, num_classes: int = 1) -> None:
         super().__init__()
 
         def b1(in_channels: int) -> nn.Sequential:
@@ -98,7 +98,7 @@ class ResNet3D(nn.Module):
             nn.Sequential(
                 nn.AdaptiveAvgPool3d((1, 1, 1)),
                 nn.Flatten(),
-                nn.LazyLinear(1),
+                nn.LazyLinear(num_classes),
             ).to(device),
         )
 

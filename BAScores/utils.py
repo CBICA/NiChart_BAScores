@@ -112,19 +112,34 @@ class EarlyStopper:
     Performs early stopping as PyTorch doesn't have an implemented one
     """
 
-    def __init__(self, patience: int = 1, min_delta: float = 0.0) -> None:
+    def __init__(
+        self, patience: int = 1, min_delta: float = 0.0, increase: bool = False
+    ) -> None:
         self.patience = patience
         self.min_delta = min_delta
         self.counter = 0
-        self.min_validation_loss = float("inf")
+        self.increase = increase
+        if not increase:
+            self.validation_loss = float("inf")
+        else:
+            self.validation_acc = 0.0
 
-    def early_stop(self, validation_loss: float) -> bool:
-        if validation_loss < self.min_validation_loss:
-            self.min_validation_loss = validation_loss
-            self.counter = 0
-        elif validation_loss > (self.min_validation_loss + self.min_delta):
-            self.counter += 1
-            if self.counter >= self.patience:
-                return True
+    def early_stop(self, validation_val: float) -> bool:
+        if not self.increase:
+            if validation_val <= self.validation_loss:
+                self.validation_loss = validation_val
+                self.counter = 0
+            elif validation_val > (self.validation_loss + self.min_delta):
+                self.counter += 1
+                if self.counter >= self.patience:
+                    return True
+        else:
+            if validation_val >= self.validation_acc:
+                self.validation_acc = validation_val
+                self.counter = 0
+            elif validation_val < self.validation_acc:
+                self.counter += 1
+                if self.counter >= self.patience:
+                    return True
 
         return False

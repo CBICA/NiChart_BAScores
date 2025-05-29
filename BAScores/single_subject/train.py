@@ -4,7 +4,7 @@ from typing import Optional
 import torch
 from torch.utils.data import DataLoader
 from torchmetrics import (
-    AUCROC,
+    AUROC,
     F1Score,
     MeanSquaredError,
     NormalizedRootMeanSquaredError,
@@ -44,7 +44,6 @@ def train_step(
         nrmse = NormalizedRootMeanSquaredError().to(device)
         r2_score = R2Score().to(device)
     else:
-        assert num_classes is not None
         stats = {
             "train_acc": 0.0,
             "train_auc": 0.0,
@@ -55,7 +54,8 @@ def train_step(
         }
 
         if mode == "multiclass":
-            auc = AUCROC(task=mode, average="macro", num_classes=num_classes).to(device)
+            assert num_classes is not None
+            auc = AUROC(task=mode, average="macro", num_classes=num_classes).to(device)
             recall = Recall(task=mode, average="macro", num_classes=num_classes).to(
                 device
             )
@@ -69,7 +69,7 @@ def train_step(
                 device
             )
         else:
-            auc = AUCROC(task=mode).to(device)
+            auc = AUROC(task=mode).to(device)
             recall = Recall(task=mode).to(device)
             precision = Precision(task=mode).to(device)
             specificity = Specificity(task=mode).to(device)
@@ -141,18 +141,18 @@ def test_step(
         nrmse = NormalizedRootMeanSquaredError().to(device)
         r2_score = R2Score().to(device)
     else:
-        assert num_classes is not None
         stats = {
-            "train_acc": 0.0,
-            "train_auc": 0.0,
-            "train_recall": 0.0,
-            "test_precision": 0.0,
-            "train_specificity": 0.0,
-            "train_f1": 0.0,
+            "test_acc": 0.0,
+            "test_auc": 0.0,
+            "test_recall": 0.0,
+            "testprecision": 0.0,
+            "test_specificity": 0.0,
+            "test_f1": 0.0,
         }
 
         if mode == "multiclass":
-            auc = AUCROC(task=mode, average="macro", num_classes=num_classes).to(device)
+            assert num_classes is not None
+            auc = AUROC(task=mode, average="macro", num_classes=num_classes).to(device)
             recall = Recall(task=mode, average="macro", num_classes=num_classes).to(
                 device
             )
@@ -166,7 +166,7 @@ def test_step(
                 device
             )
         else:
-            auc = AUCROC(task=mode).to(device)
+            auc = AUROC(task=mode).to(device)
             recall = Recall(task=mode).to(device)
             precision = Precision(task=mode).to(device)
             specificity = Specificity(task=mode).to(device)
@@ -245,7 +245,8 @@ def train(
         }
         best_res = float("inf")
     else:
-        assert num_classes is not None
+        if mode == "multiclass":
+            assert num_classes is not None
         results = {
             "train_acc": [],
             "train_auc": [],
@@ -268,7 +269,9 @@ def train(
         }
         best_res = 0.0
 
-    early_stopper = EarlyStopper(patience=patience)
+    early_stopper = EarlyStopper(
+        patience=patience, increase=True if mode != "regression" else False
+    )
     for epoch in tqdm(range(epochs)):
         train_stats = train_step(
             model=model,
@@ -297,6 +300,10 @@ def train(
                     print(
                         f"[INFO] New best model saved at {target_dir} with test MAE: {best_res:.4f}"
                     )
+            if early_stopper.early_stop(test_stats["test_mae"]):
+                if verbose:
+                    print("Early stopping the training!")
+                break
         else:
             if test_stats["test_auc"] > best_res:
                 best_res = test_stats["test_auc"]
@@ -305,11 +312,10 @@ def train(
                     print(
                         f"[INFO] New best model saved at {target_dir} with test AUC: {best_res:.4f}"
                     )
-
-        if early_stopper.early_stop(test_stats["test_mae"]):
-            if verbose:
-                print("Early stopping the training!")
-            break
+            if early_stopper.early_stop(test_stats["test_auc"]):
+                if verbose:
+                    print("Early stopping the training!")
+                break
 
         if mode == "regression":
             if verbose:
@@ -347,15 +353,15 @@ def train(
                     f"test_auc: {test_stats['test_auc']:.4f} | "
                     f"test_recall: {test_stats['test_recall']:.4f} | "
                     f"test_precision: {test_stats['test_precision']:.4f} | "
-                    f"test_specificity: {train_stats['test_specificity']:.4f} | "
+                    f"test_specificity: {test_stats['test_specificity']:.4f} | "
                     f"test_f1: {test_stats['test_f1']:.4f}"
                 )
 
             results["train_acc"].append(train_stats["train_acc"])
             results["train_auc"].append(train_stats["train_auc"])
             results["train_recall"].append(train_stats["train_recall"])
-            results["train_precision"].append(test_stats["train_precision"])
-            results["train_specificity"].append(test_stats["train_specificity"])
+            results["train_precision"].append(train_stats["train_precision"])
+            results["train_specificity"].append(train_stats["train_specificity"])
             results["train_f1"].append(train_stats["train_f1"])
             results["test_acc"].append(test_stats["test_acc"])
             results["test_auc"].append(test_stats["test_auc"])
