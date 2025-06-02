@@ -1,3 +1,4 @@
 1) Multiclass classification is not ready yet, i have to change a lot for it to work, but it will be done once i have to train a model with multiclass data
+    update: Multiclass classification is somewhat ready, im not quite sure if i made a mistake somewhere.
 
 2) Update documentation with the updated parameters(mode, num_classes)
