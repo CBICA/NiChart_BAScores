@@ -119,27 +119,31 @@ class EarlyStopper:
         self.min_delta = min_delta
         self.counter = 0
         self.increase = increase
-        if not increase:
-            self.validation_loss = float("inf")
-        else:
-            self.validation_acc = 0.0
+        self.best_value = float("-inf") if increase else float("inf")
 
     def early_stop(self, validation_val: float) -> bool:
         if not self.increase:
-            if validation_val <= self.validation_loss:
-                self.validation_loss = validation_val
+            if validation_val <= (self.best_value - self.min_delta):
+                self.best_value = validation_val
                 self.counter = 0
-            elif validation_val > (self.validation_loss + self.min_delta):
+            else:
                 self.counter += 1
-                if self.counter >= self.patience:
-                    return True
         else:
-            if validation_val >= self.validation_acc:
-                self.validation_acc = validation_val
+            if validation_val >= (self.best_value + self.min_delta):
+                self.best_value = validation_val
                 self.counter = 0
-            elif validation_val < self.validation_acc:
+            else:
                 self.counter += 1
-                if self.counter >= self.patience:
-                    return True
 
-        return False
+        return self.counter >= self.patience
+
+
+def init_weights(net: nn.Module) -> None:
+    for block in net:
+        for layer in block.children():
+            if isinstance(layer, nn.Conv3d) or isinstance(layer, nn.LazyConv3d):
+                for name, weight in layer.named_parameters():
+                    if "weight" in name:
+                        nn.init.kaiming_normal_(weight)
+                    if "bias" in name:
+                        nn.init.constant_(weight, 0.0)

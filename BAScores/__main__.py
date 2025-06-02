@@ -4,6 +4,7 @@ from typing import Any
 import torch
 
 from BAScores.loader import create_dataloaders
+from BAScores.models.alexnet3d import AlexNet3D
 from BAScores.models.pairwise import PairwiseModel3D
 from BAScores.models.resnet3d import ResNet3D
 from BAScores.pairwise.evaluate import evaluate as evaluate_pairwise
@@ -83,6 +84,10 @@ def run_train(args: Any) -> None:
         ),
         "resnet34": ResNet3D(
             arch=((3, 64), (4, 128), (6, 256), (3, 512)),
+            num_classes=1 if args.num_classes == -1 else args.num_classes,
+            device=args.device,
+        ),
+        "alexnet": AlexNet3D(
             num_classes=1 if args.num_classes == -1 else args.num_classes,
             device=args.device,
         ),

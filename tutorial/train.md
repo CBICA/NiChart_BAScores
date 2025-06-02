@@ -4,6 +4,7 @@
 NiChart_BAScores train \
                  --in_dir ../Datasets/BAScores/ISTAG_CN_All/ \
                  --out_dir ../ \
+                 --mode binary \
                  --label_dict ../Datasets/BAScores/ISTAG_CN_All/demog.csv \
                  --model_name BAScores_brain_age_single_BL_AdamW.pth \
                  --device cuda \
@@ -21,6 +22,7 @@ NiChart_BAScores train \
 
 - in_dir: The input directory that contains the train, test and eval folders with LPS oriented, DLICV preprocessed T1 images
 - out_dir: The output directory that the file of the model weights with name: `model_name` will be saved
+- mode: Either regression, binary or multiclass. The last two corresponds to classification.
 - label_dict: The path to a .csv file that must contain a column with the MRID's and a column with the values of the targets
 - model_name: See above
 - device: Either cuda, mps or cpu
