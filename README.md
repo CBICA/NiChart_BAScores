@@ -16,6 +16,7 @@ To train a model, you first need a directory that contains `train`, `test` and `
 NiChart_BAScores train \
                  --in_dir [in_dir] \
                  --out_dir [out_dir] \
+                 --mode [mode] \
                  --label_dict [label_dict_path] \
                  --model_type single \
                  --model resnet18 \
@@ -29,6 +30,7 @@ Evaluation is performed by default as the last step in training, but, the user h
 ```bash
 NiChart_BAScores evaluate \
                  --in_dir [in_dir] \
+                 --mode [mode] \
                  --model resnet18 \
                  --model_type single \
                  --model_weights [model_weights(.pth)] \
