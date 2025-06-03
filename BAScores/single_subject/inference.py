@@ -38,16 +38,23 @@ def inference(
 
     y_preds = []
     with torch.no_grad():
-        for idx, imgs in enumerate(dataloader):
+        for idx, (imgs, mrids) in enumerate(dataloader):
             imgs = imgs.to(device)
             imgs = imgs.float()
 
             y_pred = model(imgs).squeeze(dim=-1)
-            if len(y_pred) > 1:
-                y_preds.extend(y_pred.cpu().tolist())
+            y_pred = y_pred.cpu().tolist()
+            if isinstance(mrids, (list, tuple)):
+                for mrid, pred in zip(mrids, y_pred):
+                    y_preds.append((mrid, pred))
             else:
-                y_preds.append(y_pred.cpu().item())
+                y_preds.append((mrids, y_pred))
 
-    inference_res = pd.DataFrame({"Prediction": y_preds})
+    inference_res = pd.DataFrame(
+        {
+            "MRID": [y_pred[0] for y_pred in y_preds],
+            "Prediction": [y_pred[1] for y_pred in y_preds],
+        }
+    )
     out_path = os.path.join(out_dir, csv_name)
-    inference_res.to_csv(out_path, index=True)
+    inference_res.to_csv(out_path, index=False)

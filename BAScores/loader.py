@@ -59,8 +59,9 @@ class SingleSubjectDataloader(Dataset):
         self.label_dict = label_dict
         self.images: list = []
         self.img_label: list = []
+        self.mrids: list = []
         self._fetch_images()
-        if self.mode != "inference":
+        if mode != "inference":
             self._fetch_labels()
 
     def _fetch_images(self) -> None:
@@ -68,6 +69,7 @@ class SingleSubjectDataloader(Dataset):
             if img_name.endswith(".nii.gz"):
                 image_path = self.in_dir / img_name
                 self.images.append(image_path)
+                self.mrids.append(get_prefix(img_name))
 
     def _fetch_labels(self) -> None:
         for img in self.images:
@@ -83,6 +85,7 @@ class SingleSubjectDataloader(Dataset):
             img_path, label = self.img_label[index]
         else:
             img_path = self.images[index]
+            mrid = self.mrids[index]
 
         img = tio.ScalarImage(img_path)
         resize = tio.Resize((128, 128, 128))
@@ -119,8 +122,8 @@ class SingleSubjectDataloader(Dataset):
 
         if self.mode != "inference":
             return img_tensor, torch.tensor(label, dtype=torch.float32)
-
-        return img_tensor
+        else:
+            return img_tensor, mrid
 
 
 class PairwiseDataloader(Dataset):
