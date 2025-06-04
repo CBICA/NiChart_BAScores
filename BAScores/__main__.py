@@ -15,6 +15,26 @@ from BAScores.single_subject.inference import inference as inference_single
 from BAScores.single_subject.train import train as train_single
 
 
+def available_models(num_classes: int, device: str, dropout: float) -> dict:
+    return {
+        "resnet18": ResNet3D(
+            arch=((2, 64), (2, 128), (2, 256), (2, 512)),
+            num_classes=1 if num_classes == -1 else num_classes,
+            device=device,
+        ),
+        "resnet34": ResNet3D(
+            arch=((3, 64), (4, 128), (6, 256), (3, 512)),
+            num_classes=1 if num_classes == -1 else num_classes,
+            device=device,
+        ),
+        "alexnet": AlexNet3D(
+            num_classes=1 if num_classes == -1 else num_classes,
+            device=device,
+            dropout=dropout,
+        ),
+    }
+
+
 def select_optimizer(
     model: Any, optimizer: str, lr: float, weight_decay: float
 ) -> torch.optim:
@@ -76,22 +96,7 @@ def run_train(args: Any) -> None:
         "cpu",
     ], "Please provide one of the following devices: [cuda, mps, cpu]"
 
-    AVAILABLE_MODELS = {
-        "resnet18": ResNet3D(
-            arch=((2, 64), (2, 128), (2, 256), (2, 512)),
-            num_classes=1 if args.num_classes == -1 else args.num_classes,
-            device=args.device,
-        ),
-        "resnet34": ResNet3D(
-            arch=((3, 64), (4, 128), (6, 256), (3, 512)),
-            num_classes=1 if args.num_classes == -1 else args.num_classes,
-            device=args.device,
-        ),
-        "alexnet": AlexNet3D(
-            num_classes=1 if args.num_classes == -1 else args.num_classes,
-            device=args.device,
-        ),
-    }  # TODO: Support more CNN architectures
+    AVAILABLE_MODELS = available_models(args.num_classes, args.device, args.dropout)
 
     assert (
         args.model in AVAILABLE_MODELS.keys()
@@ -171,18 +176,7 @@ def run_evaluate(args: Any) -> None:
     if args.mode == "regression":
         assert args.num_classes == -1
 
-    AVAILABLE_MODELS = {
-        "resnet18": ResNet3D(
-            arch=((2, 64), (2, 128), (2, 256), (2, 512)),
-            num_classes=1 if args.num_classes == -1 else args.num_classes,
-            device=args.device,
-        ),
-        "resnet34": ResNet3D(
-            arch=((3, 64), (4, 128), (6, 256), (3, 512)),
-            num_classes=1 if args.num_classes == -1 else args.num_classes,
-            device=args.device,
-        ),
-    }  # TODO: Support more CNN architectures
+    AVAILABLE_MODELS = available_models(args.num_classes, args.device, args.dropout)
     assert (
         args.model in AVAILABLE_MODELS.keys()
     ), f"Please provide a currently supported model: {AVAILABLE_MODELS.keys()}"
@@ -219,14 +213,7 @@ def run_evaluate(args: Any) -> None:
 
 
 def run_inference(args: Any) -> None:
-    AVAILABLE_MODELS = {
-        "resnet18": ResNet3D(
-            arch=((2, 64), (2, 128), (2, 256), (2, 512)), device=args.device
-        ),
-        "resnet34": ResNet3D(
-            arch=((3, 64), (4, 128), (6, 256), (3, 512)), device=args.device
-        ),
-    }  # TODO: Support more CNN architectures
+    AVAILABLE_MODELS = available_models(args.num_classes, args.device, args.dropout)
     assert (
         args.model in AVAILABLE_MODELS.keys()
     ), f"Please provide a currently supported model: {AVAILABLE_MODELS.keys()}"
@@ -401,6 +388,14 @@ def main() -> None:
         action="store_true",
         help="Provides additional details(in log files) when set.",
     )
+
+    train.add_argument(
+        "--dropout",
+        type=float,
+        default=0.5,
+        required=False,
+        help="[Only for AlexNet3D] Set the dropout value for the last layers",
+    )
     train.set_defaults(func=run_train)
 
     # evaluate
@@ -488,6 +483,14 @@ def main() -> None:
         required=False,
         help="The path that the prediction vs ground truth plot will be saved. Default: None",
     )
+
+    evaluate.add_argument(
+        "--dropout",
+        type=float,
+        default=0.5,
+        required=False,
+        help="[Only for AlexNet3D] Set the dropout value for the last layers",
+    )
     evaluate.set_defaults(func=run_evaluate)
 
     # inference
@@ -541,6 +544,14 @@ def main() -> None:
     )
 
     inference.add_argument(
+        "--num_classes",
+        type=int,
+        required=False,
+        default=-1,
+        help="Only if mode != regression. Set the number of classes",
+    )
+
+    inference.add_argument(
         "--batch_size",
         type=int,
         required=False,
@@ -555,6 +566,14 @@ def main() -> None:
         default="cuda",
         required=False,
         help="The device that evaluation will run with. Default: cuda",
+    )
+
+    inference.add_argument(
+        "--dropout",
+        type=float,
+        default=0.5,
+        required=False,
+        help="[Only for AlexNet3D] Set the dropout value for the last layers",
     )
     inference.set_defaults(func=run_inference)
 

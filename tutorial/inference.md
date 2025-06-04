@@ -3,14 +3,14 @@
 
 ```bash
 NiChart_BAScores inference \
-                 --in_dir ../Datasets/BAScores/ISTAG_CN_All/eval \
-                 --out_dir . \
-                 --csv_name y_pred.csv \
-                 --device cuda \
-                 --model_type single \
-                 --model resnet18 \
-                 --model_weights BAScores_brain_age_single_BL_AdamW.pth \
-                 --batch_size 256 \
+                 --in_dir [input directory]
+                 --out_dir [output directory] \
+                 --csv_name [output csv name(.csv)] \
+                 --device [cuda, mps, cpu] \
+                 --model_type [single, pairwise] \
+                 --model [model name(for example: resnet18)] \
+                 --model_weights [model weights name(.pth)] \
+                 --batch_size [batch_size(int)] \
 ```
 
 - in_dir: The input directory that contains the train, test and eval folders with LPS oriented, DLICV preprocessed T1 images

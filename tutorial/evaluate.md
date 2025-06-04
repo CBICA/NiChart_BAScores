@@ -2,15 +2,16 @@
 
 ```bash
 NiChart_BAScores evaluate \
-                 --in_dir ../Datasets/BAScores/ISTAG_CN_All/ \
-                 --model resnet18 \
-                 --model_type single \
-                 --model_weights BAScores_brain_age_single_BL_AdamW.pth \
-                 --label_dict ../Datasets/BAScores/ISTAG_CN_all/demog.csv \
-                 --target Age \
-                 --device cuda \
+                 --in_dir [input directory] \
+                 --model [model name(for example: resnet18)] \
+                 --mode [binary, multiclass, regression] \
+                 --model_type [single, pairwise] \
+                 --model_weights [model weights name(.pth)] \
+                 --label_dict [path to .csv] \
+                 --target [target name(same as label dict)] \
+                 --device [cuda, mps, cpu] \
                  --verbose \
-                 --plot_path y_pred_vs_y_hat.png
+                 --plot_path [image name(.png)]
 ```
 
 - in_dir: The input directory that contains the train, test and eval folders with LPS oriented, DLICV preprocessed T1 images

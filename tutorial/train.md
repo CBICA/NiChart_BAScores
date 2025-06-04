@@ -2,21 +2,21 @@
 
 ```bash
 NiChart_BAScores train \
-                 --in_dir ../Datasets/BAScores/ISTAG_CN_All/ \
-                 --out_dir ../ \
-                 --mode binary \
-                 --label_dict ../Datasets/BAScores/ISTAG_CN_All/demog.csv \
-                 --model_name BAScores_brain_age_single_BL_AdamW.pth \
-                 --device cuda \
-                 --model_type single \
-                 --model resnet18 \
-                 --target Age \
-                 --optimizer AdamW \
-                 --batch_size 64 \
-                 --lr 0.001 \
-                 --weight_decay 0.01 \
-                 --epochs 100 \
-                 --patience 10 \
+                 --in_dir [input directory] \
+                 --out_dir [output directory] \
+                 --mode [binary, multiclass, regression] \
+                 --label_dict [path to .csv] \
+                 --model_name [output model name(.pth)] \
+                 --device [cuda, mps, cpu] \
+                 --model_type [single, pairwise] \
+                 --model [model name(for example: resnet18)] \
+                 --target [target name(same as in label dict)] \
+                 --optimizer [Optimizer name(See below)] \
+                 --batch_size [batch size(int)] \
+                 --lr [learning rate(float)] \
+                 --weight_decay [weight decay/L2 regularization(float)] \
+                 --epochs [total epochs(int)] \
+                 --patience [patiance(int)] \
                  --verbose \
 ```
 

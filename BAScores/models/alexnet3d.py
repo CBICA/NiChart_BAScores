@@ -9,6 +9,7 @@ class AlexNet3D(nn.Module):
         self,
         device: str,
         num_classes: int = 1,
+        dropout: float = 0.5,
     ) -> None:
         super().__init__()
 
@@ -50,10 +51,10 @@ class AlexNet3D(nn.Module):
             nn.Flatten(),
             nn.LazyLinear(4096),
             nn.ReLU(),
-            nn.Dropout(p=0.5),
+            nn.Dropout(p=dropout),
             nn.LazyLinear(4096),
             nn.ReLU(),
-            nn.Dropout(p=0.5),
+            nn.Dropout(p=dropout),
             nn.LazyLinear(num_classes),
         ).to(device)
 
