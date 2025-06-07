@@ -10,7 +10,6 @@ NiChart_BAScores inference \
                  --model_type [single, pairwise] \
                  --model [model name(for example: resnet18)] \
                  --model_weights [model weights name(.pth)] \
-                 --batch_size [batch_size(int)] \
 ```
 
 - in_dir: The input directory that contains the train, test and eval folders with LPS oriented, DLICV preprocessed T1 images

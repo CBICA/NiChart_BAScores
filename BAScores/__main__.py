@@ -227,7 +227,6 @@ def run_inference(args: Any) -> None:
             out_dir=args.out_dir,
             csv_name=args.csv_name,
             device=args.device,
-            batch_size=args.batch_size,
         )
     else:
         # This needs a bit of work
@@ -396,6 +395,7 @@ def main() -> None:
         required=False,
         help="[Only for AlexNet3D] Set the dropout value for the last layers",
     )
+
     train.set_defaults(func=run_train)
 
     # evaluate
@@ -552,14 +552,6 @@ def main() -> None:
     )
 
     inference.add_argument(
-        "--batch_size",
-        type=int,
-        required=False,
-        default=16,
-        help="The batches that the images will be splitted into. Default: 16",
-    )
-
-    inference.add_argument(
         "-d",
         "--device",
         type=str,
@@ -575,6 +567,7 @@ def main() -> None:
         required=False,
         help="[Only for AlexNet3D] Set the dropout value for the last layers",
     )
+
     inference.set_defaults(func=run_inference)
 
     args = parser.parse_args()

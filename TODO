@@ -1,1 +1,5 @@
 1) Update new inference in PairwiseDataloader as well(see what i changed in SingleSubjectDataloader). Inference should return mrids as well so that we can add them into the output csv.
+
+2) I don't even have to create a decoder, i can just F.interpolate()...
+
+3) After that, i have to make inference work with gradcam and that's all.

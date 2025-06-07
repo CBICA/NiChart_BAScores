@@ -1,12 +1,15 @@
 import os
 
+import nibabel as nib
+import numpy as np
 import pandas as pd
 import torch
+from medcam import medcam
 from torch.utils.data import DataLoader
 from typing_extensions import Literal
 
 from BAScores.loader import SingleSubjectDataloader
-from BAScores.utils import load_single_model_weights
+from BAScores.utils import load_single_model_weights, save_attention_as_niftii
 
 
 def inference(
@@ -16,7 +19,7 @@ def inference(
     out_dir: str,
     csv_name: str,
     device: Literal["cuda", "mps", "cpu"] = "cuda",
-    batch_size: int = 16,
+    batch_size: int = 1,
 ) -> None:
 
     load_single_model_weights(model, model_weights, device)
@@ -33,17 +36,35 @@ def inference(
         collate_fn=lambda x: torch.utils.data.dataloader.default_collate(x),
     )
 
+    model = medcam.inject(
+        model,
+        output_dir="attention_maps",
+        backend="gcam",
+        label="best",
+        save_maps=False,
+        return_attention=True,
+    )
     model.to(device)
+
     model.eval()
 
     y_preds = []
     with torch.no_grad():
         for idx, (imgs, mrids) in enumerate(dataloader):
+            affine = nib.load(f"{in_dir}/{mrids[0]}_T1_LPS_dlicv_aligned.nii.gz").affine
             imgs = imgs.to(device)
             imgs = imgs.float()
 
-            y_pred = model(imgs).squeeze(dim=-1)
+            y_pred, attention = model(imgs)
+            y_pred = y_pred.view(-1)
+            attention = np.squeeze(attention)
+
             y_pred = y_pred.cpu().tolist()
+            attention = attention.cpu().numpy()
+            save_attention_as_niftii(
+                attention, affine, f"../attention_maps/{mrids[0]}.nii.gz"
+            )
+
             if isinstance(mrids, (list, tuple)):
                 for mrid, pred in zip(mrids, y_pred):
                     y_preds.append((mrid, pred))

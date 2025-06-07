@@ -1,6 +1,8 @@
 from collections import OrderedDict
+from typing import Any
 
 import matplotlib.pyplot as plt
+import nibabel as nib
 import numpy as np
 import torch
 from torch import nn
@@ -113,22 +115,22 @@ class EarlyStopper:
     """
 
     def __init__(
-        self, patience: int = 1, min_delta: float = 0.0, increase: bool = False
+        self, patience: int = 1, min_delta: float = 0.0, regression: bool = False
     ) -> None:
         self.patience = patience
         self.min_delta = min_delta
         self.counter = 0
-        self.increase = increase
-        self.best_value = float("-inf") if increase else float("inf")
+        self.regression = regression
+        self.best_value = float("inf") if regression else float("-inf")
 
     def early_stop(self, validation_val: float) -> bool:
-        if not self.increase:
+        if self.regression:
             if validation_val <= (self.best_value - self.min_delta):
                 self.best_value = validation_val
                 self.counter = 0
             else:
                 self.counter += 1
-        else:
+        else:  # classification
             if validation_val >= (self.best_value + self.min_delta):
                 self.best_value = validation_val
                 self.counter = 0
@@ -147,3 +149,8 @@ def init_weights(net: nn.Module) -> None:
                         nn.init.kaiming_normal_(weight)
                     if "bias" in name:
                         nn.init.constant_(weight, 0.0)
+
+
+def save_attention_as_niftii(att_map: torch.Tensor, affine: Any, out_path: str) -> None:
+    att_img = nib.Nifti1Image(att_map, affine)
+    nib.save(att_img, out_path)

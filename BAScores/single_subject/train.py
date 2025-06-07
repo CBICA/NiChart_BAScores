@@ -88,10 +88,10 @@ def train_step(
         # zero grad
         optimizer.zero_grad()
 
-        # make prediction
-        y_pred = model(X).squeeze()
-
         # loss computation
+        y_pred = model(X)
+
+        y_pred = y_pred.view(-1)
         loss = loss_fn(y_pred, y)
 
         # loss backward
@@ -144,6 +144,7 @@ def test_step(
 ) -> dict:
     # eval mode
     model.eval()
+
     if mode == "regression":
         assert num_classes is None
         stats = {"test_mae": 0.0, "test_mse": 0.0, "test_nrmse": 0.0, "test_r2": 0.0}
@@ -195,7 +196,8 @@ def test_step(
             X, y = X.to(device), y.to(device)
             X, y = X.float(), y.float()
 
-            test_pred = model(X).squeeze()
+            test_pred = model(X)
+            test_pred = test_pred.view(-1)
 
             loss = loss_fn(test_pred, y)
 
@@ -296,7 +298,7 @@ def train(
         best_res = 0.0
 
     early_stopper = EarlyStopper(
-        patience=patience, increase=True if mode == "regression" else False
+        patience=patience, regression=True if mode == "regression" else False
     )
     for epoch in tqdm(range(epochs)):
         train_stats = train_step(
