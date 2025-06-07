@@ -39,8 +39,7 @@ def inference(
     model = medcam.inject(
         model,
         output_dir="attention_maps",
-        backend="gcam",
-        label="best",
+        backend="ggcam",
         save_maps=False,
         return_attention=True,
     )
@@ -62,7 +61,7 @@ def inference(
             y_pred = y_pred.cpu().tolist()
             attention = attention.cpu().numpy()
             save_attention_as_niftii(
-                attention, affine, f"../attention_maps/{mrids[0]}.nii.gz"
+                attention, affine, f"../AD_attention_maps/{mrids[0]}.nii.gz"
             )
 
             if isinstance(mrids, (list, tuple)):
