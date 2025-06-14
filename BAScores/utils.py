@@ -135,6 +135,9 @@ class EarlyStopper:
             else:
                 self.counter += 1
 
+        print(
+            f"Patience: {self.patience}, Counter: {self.counter}, Best: {self.best_value}, Current: {validation_val}"
+        )
         return self.counter > self.patience
 
 
