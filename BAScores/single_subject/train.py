@@ -296,7 +296,7 @@ def train(
         best_res = 0.0
 
     early_stopper = EarlyStopper(
-        patience=patience, increase=True if mode == "regression" else False
+        patience=patience, increase=True if mode == "classification" else False
     )
     for epoch in tqdm(range(epochs)):
         train_stats = train_step(

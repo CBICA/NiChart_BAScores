@@ -1,1 +1,0 @@
-1) Update new inference in PairwiseDataloader as well(see what i changed in SingleSubjectDataloader). Inference should return mrids as well so that we can add them into the output csv.

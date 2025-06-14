@@ -123,19 +123,19 @@ class EarlyStopper:
 
     def early_stop(self, validation_val: float) -> bool:
         if not self.increase:
-            if validation_val <= (self.best_value - self.min_delta):
+            if validation_val <= self.best_value:
                 self.best_value = validation_val
                 self.counter = 0
             else:
                 self.counter += 1
         else:
-            if validation_val >= (self.best_value + self.min_delta):
+            if validation_val >= self.best_value:
                 self.best_value = validation_val
                 self.counter = 0
             else:
                 self.counter += 1
 
-        return self.counter >= self.patience
+        return self.counter > self.patience
 
 
 def init_weights(net: nn.Module) -> None:
