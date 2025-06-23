@@ -10,7 +10,7 @@ NiChart_BAScores inference \
                  --model_type [single, pairwise] \
                  --model [model name(for example: resnet18)] \
                  --model_weights [model weights name(.pth)] \
-                 --batch_size [batch_size(int)] \
+                 --return_attention
 ```
 
 - in_dir: The input directory that contains the train, test and eval folders with LPS oriented, DLICV preprocessed T1 images
@@ -20,4 +20,5 @@ NiChart_BAScores inference \
 - model: The type of backbone, currently supported: [resnet18, resnet34]
 - model_type: Either single or pairwise
 - model_weights: The path to a .pth file that contains the weights of the selected model
-- batch_size: The batch size that the loader will use. This will make things faster but will increase the GPU overhead
+- return_attention: Set if you want to save the attention maps of the passed
+  images in the specified output directory

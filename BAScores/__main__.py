@@ -238,8 +238,8 @@ def run_inference(args: Any) -> None:
             in_dir=args.in_dir,
             out_dir=args.out_dir,
             csv_name=args.csv_name,
+            return_attention=True if args.return_attention else False,
             device=args.device,
-            batch_size=args.batch_size,
         )
     else:
         # This needs a bit of work
@@ -564,14 +564,6 @@ def main() -> None:
     )
 
     inference.add_argument(
-        "--batch_size",
-        type=int,
-        required=False,
-        default=16,
-        help="The batches that the images will be splitted into. Default: 16",
-    )
-
-    inference.add_argument(
         "-d",
         "--device",
         type=str,
@@ -586,6 +578,12 @@ def main() -> None:
         default=0.5,
         required=False,
         help="[Only for AlexNet3D] Set the dropout value for the last layers",
+    )
+
+    inference.add_argument(
+        "--return_attention",
+        action="store_true",
+        help="Returns the attention maps in the specified output directory",
     )
     inference.set_defaults(func=run_inference)
 

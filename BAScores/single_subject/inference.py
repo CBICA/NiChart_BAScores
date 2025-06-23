@@ -1,7 +1,10 @@
 import os
 
+import nibabel as nib
 import pandas as pd
 import torch
+from MedVision import GuidedBackPropagation
+from torch import nn
 from torch.utils.data import DataLoader
 from typing_extensions import Literal
 
@@ -15,11 +18,24 @@ def inference(
     in_dir: str,
     out_dir: str,
     csv_name: str,
+    return_attention: bool = False,
     device: Literal["cuda", "mps", "cpu"] = "cuda",
-    batch_size: int = 16,
 ) -> None:
 
     load_single_model_weights(model, model_weights, device)
+
+    if return_attention:
+
+        @GuidedBackPropagation(output_dir=out_dir)
+        class _Model(nn.Module):
+            def __init__(self) -> None:
+                super().__init__()
+                self.net = model
+
+            def forward(self, x: torch.Tensor) -> torch.Tensor:
+                return self.net(x)
+
+        model = _Model()
 
     single_loader = SingleSubjectDataloader(
         mode="inference",
@@ -27,9 +43,9 @@ def inference(
     )
     dataloader = DataLoader(
         single_loader,
-        batch_size=batch_size,
+        batch_size=1,
         shuffle=False,
-        num_workers=os.cpu_count() // 2,  # type: ignore
+        num_workers=0,
         collate_fn=lambda x: torch.utils.data.dataloader.default_collate(x),
     )
 
@@ -37,18 +53,26 @@ def inference(
     model.eval()
 
     y_preds = []
-    with torch.no_grad():
-        for idx, (imgs, mrids) in enumerate(dataloader):
-            imgs = imgs.to(device)
-            imgs = imgs.float()
+    for _, (imgs, mrids) in enumerate(dataloader):
+        preprocessed_img = nib.load(f"{in_dir}/{mrids[0]}_T1_LPS_dlicv_aligned.nii.gz")
+        imgs = imgs.to(device)
+        imgs = imgs.float()
+        imgs.requires_grad_()
 
+        if return_attention:
+            y_pred = model(
+                imgs,
+                niftii_header=preprocessed_img.header.copy(),
+                out_name=f"{mrids[0]}_T1_LPS_dlicv_aligned_attention.nii.gz",
+            ).squeeze(dim=-1)
+        else:
             y_pred = model(imgs).squeeze(dim=-1)
-            y_pred = y_pred.cpu().tolist()
-            if isinstance(mrids, (list, tuple)):
-                for mrid, pred in zip(mrids, y_pred):
-                    y_preds.append((mrid, pred))
-            else:
-                y_preds.append((mrids, y_pred))
+        y_pred = y_pred.cpu().tolist()
+        if isinstance(mrids, (list, tuple)):
+            for mrid, pred in zip(mrids, y_pred):
+                y_preds.append((mrid, pred))
+        else:
+            y_preds.append((mrids, y_pred))
 
     inference_res = pd.DataFrame(
         {
