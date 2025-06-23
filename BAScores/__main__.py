@@ -22,10 +22,22 @@ def available_models(num_classes: int, device: str, dropout: float) -> dict:
             num_classes=1 if num_classes == -1 else num_classes,
             device=device,
         ),
+        "resnet18-cbam": ResNet3D(
+            arch=((2, 64), (2, 128), (2, 256), (2, 512)),
+            num_classes=1 if num_classes == -1 else num_classes,
+            device=device,
+            cbam=True,
+        ),
         "resnet34": ResNet3D(
             arch=((3, 64), (4, 128), (6, 256), (3, 512)),
             num_classes=1 if num_classes == -1 else num_classes,
             device=device,
+        ),
+        "resnet34-cbam": ResNet3D(
+            arch=((3, 64), (4, 128), (6, 256), (3, 512)),
+            num_classes=1 if num_classes == -1 else num_classes,
+            device=device,
+            cbam=True,
         ),
         "alexnet": AlexNet3D(
             num_classes=1 if num_classes == -1 else num_classes,

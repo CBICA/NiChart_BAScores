@@ -8,6 +8,7 @@ BAScores/loader.py
 BAScores/utils.py
 BAScores/models/__init__.py
 BAScores/models/alexnet3d.py
+BAScores/models/cbam.py
 BAScores/models/pairwise.py
 BAScores/models/resnet3d.py
 BAScores/pairwise/__init__.py
