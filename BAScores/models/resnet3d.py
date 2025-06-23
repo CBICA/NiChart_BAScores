@@ -4,6 +4,7 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+from BAScores.models.cbam import CBAM
 from BAScores.utils import init_weights
 
 
@@ -14,8 +15,10 @@ class Residual(nn.Module):
         device: str,
         use_1x1conv: bool = False,
         strides: int = 1,
+        cbam: bool = False,
     ) -> None:
         super().__init__()
+        self.cbam = cbam
         self.conv1 = nn.LazyConv3d(
             num_channels,
             kernel_size=(3, 3, 3),
@@ -35,9 +38,15 @@ class Residual(nn.Module):
         self.bn1 = nn.LazyBatchNorm3d().to(device)
         self.bn2 = nn.LazyBatchNorm3d().to(device)
 
+        if cbam:
+            self.cbam_module = CBAM(num_channels)
+
     def forward(self, X: torch.Tensor) -> torch.Tensor:
         Y = F.relu(self.bn1(self.conv1(X)))
         Y = self.bn2(self.conv2(Y))
+
+        if self.cbam:
+            self.cbam_module(Y)
 
         if self.conv3:
             X = self.conv3(X)
@@ -47,7 +56,13 @@ class Residual(nn.Module):
 
 
 class ResNet3D(nn.Module):
-    def __init__(self, arch: Any, device: str, num_classes: int = 1) -> None:
+    def __init__(
+        self,
+        arch: Any,
+        device: str,
+        num_classes: int = 1,
+        cbam: bool = False,
+    ) -> None:
         super().__init__()
 
         def b1(in_channels: int) -> nn.Sequential:
@@ -73,10 +88,12 @@ class ResNet3D(nn.Module):
             for i in range(num_residuals):
                 if i == 0 and not first_block:
                     blk.append(
-                        Residual(num_channels, device, use_1x1conv=True, strides=2)
+                        Residual(
+                            num_channels, device, use_1x1conv=True, strides=2, cbam=cbam
+                        )
                     )
                 else:
-                    blk.append(Residual(num_channels, device=device))
+                    blk.append(Residual(num_channels, device=device, cbam=cbam))
             return nn.Sequential(*blk).to(device)
 
         self.net = nn.Sequential(b1(arch[0][1])).to(device)
