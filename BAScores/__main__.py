@@ -225,6 +225,7 @@ def run_evaluate(args: Any) -> None:
 
 
 def run_inference(args: Any) -> None:
+    assert args.mode in ["regression", "multiclass", "binary"]
     AVAILABLE_MODELS = available_models(args.num_classes, args.device, args.dropout)
     assert (
         args.model in AVAILABLE_MODELS.keys()
@@ -234,6 +235,7 @@ def run_inference(args: Any) -> None:
         model = encoder
         inference_single(
             model=model,
+            mode=args.mode,
             model_weights=args.model_weights,
             in_dir=args.in_dir,
             out_dir=args.out_dir,
@@ -539,6 +541,13 @@ def main() -> None:
         default="resnet18",
         required=False,
         help="The encoder that will be used. Currently available: [resnet18, resnet34]",
+    )
+
+    inference.add_argument(
+        "--mode",
+        type=str,
+        required=True,
+        help="[REQUIRED] Either regression, binary or multiclass",
     )
 
     inference.add_argument(

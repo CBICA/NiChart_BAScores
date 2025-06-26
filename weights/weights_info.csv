@@ -1,4 +1,4 @@
 name,target,mae,mse,nrmse,r2
 BAScores_brain_age_single_resnet18,Age,3.1714,16.7246,0.0676,0.9126
-BAScores_brain_age_delta_pairwise_resnet18,Age,4.6888,40.6142,14.7581,0.5635
 BAScores_brain_age_SPARE-BA-Harmonized_AdamW_highl2,Age,3.5247,20.9088,0.0777,0.8992
+BAScores_brain_age_SPARE-BA-Harmonized_AdamW_highl2_resnet18-cbam,Age,3.7793,24.1262,0.0835,0.8841

@@ -354,7 +354,7 @@ def create_dataloaders(
             train_loader,
             batch_size=batch_size,
             shuffle=True,
-            num_workers=os.cpu_count() // 2,  # type: ignore
+            num_workers=os.cpu_count() // 4,  # type: ignore
             collate_fn=lambda x: torch.utils.data.dataloader.default_collate(x),
         )
     else:
@@ -364,7 +364,7 @@ def create_dataloaders(
         test_dataloader = DataLoader(
             test_loader,
             batch_size=batch_size,
-            num_workers=os.cpu_count() // 2,  # type: ignore
+            num_workers=os.cpu_count() // 4,  # type: ignore
             collate_fn=lambda x: torch.utils.data.dataloader.default_collate(x),
         )
     else:
@@ -374,7 +374,7 @@ def create_dataloaders(
         eval_dataloader = DataLoader(
             eval_loader,
             batch_size=1,
-            num_workers=os.cpu_count() // 2,  # type: ignore
+            num_workers=os.cpu_count() // 4,  # type: ignore
             collate_fn=lambda x: torch.utils.data.dataloader.default_collate(x),
         )
     else:

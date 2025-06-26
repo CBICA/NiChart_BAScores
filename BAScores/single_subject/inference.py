@@ -14,6 +14,7 @@ from BAScores.utils import load_single_model_weights
 
 def inference(
     model: torch.nn.Module,
+    mode: str,
     model_weights: str,
     in_dir: str,
     out_dir: str,
@@ -21,12 +22,11 @@ def inference(
     return_attention: bool = False,
     device: Literal["cuda", "mps", "cpu"] = "cuda",
 ) -> None:
-
     load_single_model_weights(model, model_weights, device)
 
     if return_attention:
 
-        @GuidedBackPropagation(output_dir=out_dir)
+        @GuidedBackPropagation(output_dir=out_dir, device=device, mode=mode)
         class _Model(nn.Module):
             def __init__(self) -> None:
                 super().__init__()
@@ -45,7 +45,7 @@ def inference(
         single_loader,
         batch_size=1,
         shuffle=False,
-        num_workers=0,
+        num_workers=os.cpu_count() // 4,  # type: ignore
         collate_fn=lambda x: torch.utils.data.dataloader.default_collate(x),
     )
 
@@ -67,6 +67,12 @@ def inference(
             ).squeeze(dim=-1)
         else:
             y_pred = model(imgs).squeeze(dim=-1)
+
+        if mode == "binary":
+            y_pred = (torch.sigmoid(y_pred) > 0.5).float()
+        elif mode == "multiclass":
+            y_pred = torch.argmax(y_pred, dim=1)
+
         y_pred = y_pred.cpu().tolist()
         if isinstance(mrids, (list, tuple)):
             for mrid, pred in zip(mrids, y_pred):

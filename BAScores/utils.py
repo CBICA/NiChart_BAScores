@@ -43,7 +43,7 @@ def load_single_model_weights(
                 f"Warning: Key '{new_k}' from checkpoint does not match any key in the model."
             )
 
-    model.load_state_dict(new_state_dict, strict=False)
+    model.load_state_dict(new_state_dict, strict=True)
 
 
 def load_pairwise_model_weights(
@@ -69,9 +69,7 @@ def load_pairwise_model_weights(
 
             new_state_dict[new_k] = v
 
-        model.load_state_dict(
-            new_state_dict, strict=False
-        )  # Allow partial loading if needed
+        model.load_state_dict(new_state_dict, strict=True)
     else:
         model.load_state_dict(pre_state_dict)
 
