@@ -8,15 +8,13 @@
 #SBATCH --partition=aishort
 #SBATCH --time=1:00:00
 
-NiChart_BAScores evaluate \
-                 --in_dir ../Datasets/BAScores/ISTAG_CN_All/BL_only_training \
-                 --model resnet18-cbam \
-                 --mode regression \
-                 --model_type single \
-                 --model_weights weights/BAScores_brain_age_SPARE-BA-Harmonized_AdamW_highl2_resnet18-cbam.pth \
-                 --label_dict ../Datasets/BAScores/SPARE_Lists/SPARE-BA-Harmonized.csv \
-                 --target Age \
+NiChart_BAScores inference \
+                 --in_dir ../Datasets/ADNI/ad_regression/eval_AD \
+                 --out_dir ../ad_results \
+                 --csv_name ad_preds.csv \
                  --device cuda \
-                 --verbose \
-                 --plot_path cbam_in_weights.png
-                 
+                 --model_type single \
+                 --model resnet18 \
+                 --mode regression \
+                 --model_weights weights/BAScores_brain_age_SPARE-BA-Harmonized_AdamW_highl2_resnet18.pth \
+                 --return_attention

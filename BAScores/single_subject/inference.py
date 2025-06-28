@@ -3,12 +3,12 @@ import os
 import nibabel as nib
 import pandas as pd
 import torch
-from MedVision import GuidedBackPropagation
 from torch import nn
 from torch.utils.data import DataLoader
 from typing_extensions import Literal
 
 from BAScores.loader import SingleSubjectDataloader
+from BAScores.models.guided_back_propagation import GuidedBackPropagation
 from BAScores.utils import load_single_model_weights
 
 

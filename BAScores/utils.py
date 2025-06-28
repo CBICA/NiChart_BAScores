@@ -1,8 +1,11 @@
 from collections import OrderedDict
+from typing import Optional
 
 import matplotlib.pyplot as plt
+import nibabel as nib
 import numpy as np
 import torch
+import torch.nn.functional as F
 from torch import nn
 
 
@@ -145,3 +148,40 @@ def init_weights(net: nn.Module) -> None:
                         nn.init.kaiming_normal_(weight)
                     if "bias" in name:
                         nn.init.constant_(weight, 0.0)
+
+
+def save_2d_attention(
+    attention: torch.Tensor, output_dir: str, out_name: str, idx: Optional[int] = None
+) -> None:
+    _attention = attention.clone()
+    _attention = _attention.cpu().numpy()
+
+    plt.imshow(_attention)
+    if idx is not None:
+        plt.savefig(
+            f"{output_dir}/{out_name}{idx}.png", bbox_inches="tight", pad_inches=0
+        )
+    else:
+        plt.savefig(out_name, bbox_inches="tight", pad_inches=0)
+
+
+def save_3d_attention(
+    attention: torch.Tensor,
+    niftii_header: nib.nifti1.Nifti1Header,
+    output_dir: str,
+    out_name: str,
+) -> None:
+    _attention = attention.clone()
+    dims = niftii_header.get_data_shape()
+    if dims != _attention.shape:
+        _attention = _attention.unsqueeze(0).unsqueeze(0)
+        _attention = F.interpolate(
+            _attention, size=dims, mode="trilinear", align_corners=False
+        )
+        _attention = _attention.squeeze(0).squeeze(0)
+    _attention = _attention.cpu().numpy()
+    att_img = nib.Nifti1Image(_attention, None, header=niftii_header)
+    if ".nii.gz" in out_name:
+        nib.save(att_img, f"{output_dir}/{out_name}")
+    else:
+        nib.save(att_img, f"{output_dir}/{out_name}.nii.gz")
