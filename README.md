@@ -49,6 +49,7 @@ NiChart_BAScores inference \
                  --csv_name [output csv name(.csv)] \
                  --model_type [single, pairwise] \
                  --model [model name(for example: resnet18)] \
+                 --mode [mode]
                  --model_weights [model weights name(.pth)] \
 ```
 Note that now in `in_dir` there should be only raw niftii files and not folders!
