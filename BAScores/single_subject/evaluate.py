@@ -97,14 +97,10 @@ def evaluate(
 
             y_pred = model(X).squeeze(dim=-1)
 
-            if len(y_pred) > 1:
-                y_preds.extend(y_pred.cpu().tolist())
-                y_hats.extend(y.cpu().tolist())
-            else:
+            if mode == "regression":
                 y_preds.append(y_pred.cpu().item())
                 y_hats.append(y.cpu().item())
 
-            if mode == "regression":
                 mae.update(y_pred, y)
                 mse.update(y_pred, y)
                 nrmse.update(y_pred, y)
@@ -115,6 +111,10 @@ def evaluate(
                     if mode == "binary"
                     else torch.argmax(y_pred, dim=1)
                 )
+
+                y_preds.append(y_pred_classes.cpu().item())
+                y_hats.append(y.cpu().item())
+
                 acc.update(y_pred_classes, y)
                 auc.update(y_pred_classes, y)
                 recall.update(y_pred_classes, y)
@@ -136,7 +136,7 @@ def evaluate(
         eval_stats["eval_f1"] = f1_score.compute().item()
 
     if plot_path is not None:
-        plot_preds_vs_truth(y_preds, y_hats, eval_stats, plot_path)
+        plot_preds_vs_truth(y_preds, y_hats, eval_stats, mode, plot_path)
 
     if verbose:
         if mode == "regression":

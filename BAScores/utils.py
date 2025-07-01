@@ -4,8 +4,10 @@ from typing import Optional
 import matplotlib.pyplot as plt
 import nibabel as nib
 import numpy as np
+import seaborn as sns
 import torch
 import torch.nn.functional as F
+from sklearn.metrics import confusion_matrix
 from torch import nn
 
 
@@ -78,34 +80,68 @@ def load_pairwise_model_weights(
 
 
 def plot_preds_vs_truth(
-    y_pred: list, y_hat: list, stats: dict, out_path: str = "."
+    y_pred: list,
+    y_hat: list,
+    stats: dict,
+    mode: str,
+    out_path: str = ".",
 ) -> None:
     plt.figure(figsize=(10, 6))
     plt.scatter(y_pred, y_hat, alpha=0.6, color="blue")
 
     x_vals = np.linspace(min(y_pred), max(y_pred), 100)
     plt.plot(x_vals, x_vals, color="red", linestyle="--", label="Correlation")
-    metrics_text = (
-        f"MAE: {stats['eval_mae']:.4f}\n"
-        f"MSE: {stats['eval_mse']:.4f}\n"
-        f"NRMSE: {stats['eval_nrmse']:.4f}\n"
-        f"R²: {stats['eval_r2']:.4f}"
-    )
-    plt.text(
-        0.05,
-        0.95,
-        metrics_text,
-        transform=plt.gca().transAxes,
-        fontsize=12,
-        verticalalignment="top",
-        bbox=dict(boxstyle="round", alpha=0.5, facecolor="white"),
-    )
-    plt.xlabel("Predicted Values", fontsize=14)
-    plt.ylabel("Ground Truth Values", fontsize=14)
-    plt.title("Predictions vs Ground Truth", fontsize=16)
-    plt.legend()
-    plt.grid(alpha=0.3)
-    plt.savefig(out_path, format="png", dpi=300)
+    if mode == "regression":
+        metrics_text = (
+            f"MAE: {stats['eval_mae']:.4f}\n"
+            f"MSE: {stats['eval_mse']:.4f}\n"
+            f"NRMSE: {stats['eval_nrmse']:.4f}\n"
+            f"R²: {stats['eval_r2']:.4f}"
+        )
+
+        plt.text(
+            0.05,
+            0.95,
+            metrics_text,
+            transform=plt.gca().transAxes,
+            fontsize=12,
+            verticalalignment="top",
+            bbox=dict(boxstyle="round", alpha=0.5, facecolor="white"),
+        )
+        plt.xlabel("Predicted Values", fontsize=14)
+        plt.ylabel("Ground Truth Values", fontsize=14)
+        plt.title("Predictions vs Ground Truth", fontsize=16)
+        plt.legend()
+        plt.grid(alpha=0.3)
+        plt.savefig(out_path, format="png", dpi=300)
+    else:
+        metrics_text = (
+            f"Accuracy: {stats['eval_acc']}\n"
+            f"AUC: {stats['eval_auc']}\n"
+            f"Recall: {stats['eval_recall']}\n"
+            f"Precision: {stats['eval_precision']}\n"
+            f"Specificity: {stats['eval_specificity']}\n"
+            f"F1: {stats['eval_f1']}\n"
+        )
+
+        cm = confusion_matrix(y_hat, y_pred)
+        plt.figure(figsize=(8, 6))
+        sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", cbar=False)
+        plt.xlabel("Predicted Labels", fontsize=14)
+        plt.ylabel("True Labels", fontsize=14)
+        plt.title("Confusion Matrix", fontsize=16)
+
+        plt.gcf().text(
+            1.02,
+            0.5,
+            metrics_text,
+            fontsize=12,
+            verticalalignment="center",
+            bbox=dict(boxstyle="round", alpha=0.5, facecolor="white"),
+        )
+        plt.tight_layout(rect=[0, 0, 0.85, 1])  # Leave space for metrics
+        plt.savefig(out_path, format="png", dpi=300)
+        plt.close()
 
 
 class EarlyStopper:
