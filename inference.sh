@@ -1,17 +1,17 @@
 #!/bin/bash
 #SBATCH --nodes=1
-#SBATCH --gpus-per-node=a100:1
-#SBATCH --cpus-per-gpu=16
-#SBATCH --mem-per-gpu=2000
+#SBATCH --gpus-per-node=a40:1
+#SBATCH --cpus-per-gpu=4
+#SBATCH --mem-per-gpu=100GB
 #SBATCH --output=log/inference.log
 #SBATCH --error=log/inference_error.log
-#SBATCH --partition=aishort
-#SBATCH --time=1:00:00
+#SBATCH --partition=ailong
+#SBATCH --time=10:00:00
 
 NiChart_BAScores inference \
                  --in_dir ../Datasets/ADNI/ad_regression/eval_AD \
-                 --out_dir ../ad_results \
-                 --csv_name ad_preds.csv \
+                 --out_dir ../test \
+                 --csv ../ad_preds.csv \
                  --device cuda \
                  --model_type single \
                  --model resnet18 \

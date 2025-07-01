@@ -18,7 +18,7 @@ def inference(
     model_weights: str,
     in_dir: str,
     out_dir: str,
-    csv_name: str,
+    csv: str,
     return_attention: bool = False,
     device: Literal["cuda", "mps", "cpu"] = "cuda",
 ) -> None:
@@ -45,7 +45,8 @@ def inference(
         single_loader,
         batch_size=1,
         shuffle=False,
-        num_workers=os.cpu_count() // 4,  # type: ignore
+        num_workers=os.cpu_count() // 2,  # type: ignore
+        pin_memory=True,
         collate_fn=lambda x: torch.utils.data.dataloader.default_collate(x),
     )
 
@@ -63,7 +64,7 @@ def inference(
             y_pred = model(
                 imgs,
                 niftii_header=preprocessed_img.header.copy(),
-                out_name=f"{mrids[0]}_T1_LPS_dlicv_aligned_attention.nii.gz",
+                out_name=f"{mrids[0]}_T1_LPS_dlicv_aligned.nii.gz",
             ).squeeze(dim=-1)
         else:
             y_pred = model(imgs).squeeze(dim=-1)
@@ -86,5 +87,10 @@ def inference(
             "Prediction": [y_pred[1] for y_pred in y_preds],
         }
     )
-    out_path = os.path.join(out_dir, csv_name)
+    out_path = os.path.join(out_dir, csv)
+    output_dir = os.path.dirname(out_path)
+
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+
     inference_res.to_csv(out_path, index=False)

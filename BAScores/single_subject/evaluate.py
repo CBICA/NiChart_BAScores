@@ -90,7 +90,10 @@ def evaluate(
     with torch.no_grad():
         for batch, (X, y) in enumerate(dataloader):
             X, y = X.to(device), y.to(device)
-            X, y = X.float(), y.float()
+            if mode != "multiclass":
+                X, y = X.float(), y.float()
+            else:
+                X, y = X.float(), y.long()
 
             y_pred = model(X).squeeze(dim=-1)
 

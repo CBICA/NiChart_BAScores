@@ -239,7 +239,7 @@ def run_inference(args: Any) -> None:
             model_weights=args.model_weights,
             in_dir=args.in_dir,
             out_dir=args.out_dir,
-            csv_name=args.csv_name,
+            csv=args.csv,
             return_attention=True if args.return_attention else False,
             device=args.device,
         )
@@ -251,7 +251,7 @@ def run_inference(args: Any) -> None:
             model_weights=args.model_weights,
             in_dir=args.in_dir,
             out_dir=args.out_dir,
-            csv_name=args.csv_name,
+            csv=args.csv,
             device=args.device,
             batch_size=args.batch_size,
         )
@@ -528,7 +528,7 @@ def main() -> None:
     )
 
     inference.add_argument(
-        "--csv_name",
+        "--csv",
         type=str,
         default="inference_res.csv",
         required=False,

@@ -83,7 +83,11 @@ def train_step(
 
     for X, y in dataloader:
         X, y = X.to(device), y.to(device)
-        X, y = X.float(), y.float()
+
+        if mode != "multiclass":
+            X, y = X.float(), y.float()
+        else:
+            X, y = X.float(), y.long()
 
         # zero grad
         optimizer.zero_grad()
@@ -112,7 +116,7 @@ def train_step(
                 else torch.argmax(y_pred, dim=1)
             )
             acc.update(y_pred_classes, y)
-            auc.update(y_pred_classes, y)
+            auc.update(y_pred, y)
             recall.update(y_pred_classes, y)
             precision.update(y_pred_classes, y)
             specificity.update(y_pred_classes, y)
@@ -193,7 +197,11 @@ def test_step(
     with torch.no_grad():
         for X, y in dataloader:
             X, y = X.to(device), y.to(device)
-            X, y = X.float(), y.float()
+
+            if mode != "multiclass":
+                X, y = X.float(), y.float()
+            else:
+                X, y = X.float(), y.long()
 
             test_pred = model(X).squeeze()
 
@@ -211,7 +219,7 @@ def test_step(
                     else torch.argmax(test_pred, dim=1)
                 )
                 acc.update(y_pred_classes, y)
-                auc.update(y_pred_classes, y)
+                auc.update(test_pred, y)
                 recall.update(y_pred_classes, y)
                 precision.update(y_pred_classes, y)
                 specificity.update(y_pred_classes, y)
@@ -332,14 +340,14 @@ def train(
                     print("Early stopping the training!")
                 break
         else:
-            if test_stats["test_auc"] > best_res:
-                best_res = test_stats["test_auc"]
+            if test_stats["test_acc"] > best_res:
+                best_res = test_stats["test_acc"]
                 save_model(model, target_dir, model_name)
                 if verbose:
                     print(
-                        f"[INFO] New best model saved at {target_dir} with test AUC: {best_res:.4f}"
+                        f"[INFO] New best model saved at {target_dir} with test accuracy: {best_res:.4f}"
                     )
-            if early_stopper.early_stop(test_stats["test_auc"]):
+            if early_stopper.early_stop(test_stats["test_acc"]):
                 if verbose:
                     print("Early stopping the training!")
                 break
@@ -402,6 +410,7 @@ def train(
         model=model,
         mode=mode,
         dataloader=eval_dataloader,
+        num_classes=num_classes,
         device=device,
     )
     if mode == "regression":

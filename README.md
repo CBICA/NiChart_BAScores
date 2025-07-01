@@ -46,7 +46,7 @@ Last but not least, the user has the option to perform inference using any pretr
 NiChart_BAScores inference \
                  --in_dir [input directory] \
                  --out_dir [output directory] \
-                 --csv_name [output csv name(.csv)] \
+                 --csv [full path of the .csv output file] \
                  --model_type [single, pairwise] \
                  --model [model name(for example: resnet18)] \
                  --mode [mode]

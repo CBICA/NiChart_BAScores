@@ -14,7 +14,7 @@ def inference(
     model_weights: str,
     in_dir: str,
     out_dir: str,
-    csv_name: str,
+    csv: str,
     device: Literal["cuda", "mps", "cpu"] = "cuda",
     batch_size: int = 16,
 ) -> None:
@@ -50,5 +50,10 @@ def inference(
                 y_preds.append(y_pred.cpu().item())
 
     inference_res = pd.DataFrame({"Prediction": y_preds})
-    out_path = os.path.join(out_dir, csv_name)
-    inference_res.to_csv(out_path, index=True)
+    out_path = os.path.join(out_dir, csv)
+    output_dir = os.path.dirname(out_path)
+
+    if output_dir and not os.path.exists(output_dir):
+        os.makedirs(output_dir, exist_ok=True)
+
+    inference_res.to_csv(out_path, index=False)
