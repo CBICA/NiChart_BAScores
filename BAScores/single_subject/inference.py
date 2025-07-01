@@ -87,10 +87,9 @@ def inference(
             "Prediction": [y_pred[1] for y_pred in y_preds],
         }
     )
-    out_path = os.path.join(out_dir, csv)
-    output_dir = os.path.dirname(out_path)
+    output_dir = os.path.dirname(csv)
 
     if output_dir and not os.path.exists(output_dir):
         os.makedirs(output_dir, exist_ok=True)
 
-    inference_res.to_csv(out_path, index=False)
+    inference_res.to_csv(csv, index=False)
