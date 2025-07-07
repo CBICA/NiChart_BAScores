@@ -47,7 +47,6 @@ def inference(
         shuffle=False,
         num_workers=os.cpu_count() // 2,  # type: ignore
         pin_memory=True,
-        collate_fn=lambda x: torch.utils.data.dataloader.default_collate(x),
     )
 
     model.to(device)
