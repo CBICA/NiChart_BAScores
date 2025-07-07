@@ -1,5 +1,6 @@
 name,target,mae,mse,nrmse,r2,acc,auc,recall,precision,specificity,f1
 BAScores_brain_age_ISTAGING2_healthy_only_Adadelta_resnet18,Age,2.9274,14.1381,0.0578,0.8586,,,,,,,
+BAScores_brain_age_ISTAGING2_healthy_only_AdamW_resnet18,Age,3.0825,15.6279,0.0608,0.8437,,,,,,,
 BAScores_brain_age_SPARE-BA-Harmonized_AdamW_highl2_resnet18,Age,3.1423,16.7577,0.0696,0.9195,,,,,,,
 BAScores_brain_age_SPARE-BA-Harmonized_AdamW_highl2_resnet18-cbam,Age,3.7793,24.1262,0.0835,0.8841,,,,,,,
 BAScores_brain_age_SPARE-BA-Harmonized_AdamW_highl2_resnet34,Age,3.5855,22.2692,0.0802,0.8930,,,,,,,
