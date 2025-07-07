@@ -208,6 +208,11 @@ def save_3d_attention(
     out_name: str,
 ) -> None:
     _attention = attention.clone()
+
+    # normalize
+    _attention -= _attention.mean((0, 1, 2), keepdim=True)
+    _attention /= _attention.std((0, 1, 2), keepdim=True)
+
     dims = niftii_header.get_data_shape()
     if dims != _attention.shape:
         _attention = _attention.unsqueeze(0).unsqueeze(0)
