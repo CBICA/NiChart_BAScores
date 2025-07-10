@@ -9,13 +9,12 @@
 #SBATCH --time=10:00:00
 
 NiChart_BAScores inference \
-                 --in_dir ../Datasets/BAScores/ISTAG_DISEASED_All/test \
-                 --out_dir ../ \
-                 --csv test.csv \
+                 --in_dir ../Datasets/BAScores/ISTAG_CN_All/istaging_2_new/smoking/smoking_PURE/ \
+                 --out_dir . \
+                 --csv ../Datasets/BAScores/ISTAG_CN_All/istaging_2_new/preds/smoking_preds.csv \
                  --model resnet18 \
                  --mode regression \
                  --model_type single \
-                 --model_weights weights/BAScores_brain_age_ISTAGING2_healthy_only_Adadelta_resnet18.pth \
+                 --model_weights weights/BAScores_brain_age_ISTAGING2_new_healthy_only_Adadelta_resnet18.pth \
                  --device cuda \
-                 --return_attention
-                 
+                
