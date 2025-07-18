@@ -67,6 +67,7 @@ class Residual(nn.Module):
             stride=strides,
             bias=False,
         ).to(device)
+
         self.conv2 = LazyConv3d(num_channels, kernel_size=3, padding=1, bias=False).to(
             device
         )
@@ -82,8 +83,10 @@ class Residual(nn.Module):
         if cbam:
             self.cbam_module = CBAM(num_channels)
 
+        self.relu = nn.ReLU(inplace=True)
+
     def forward(self, X: torch.Tensor) -> torch.Tensor:
-        Y = F.relu(self.bn1(self.conv1(X)), inplace=True)
+        Y = self.relu(self.bn1(self.conv1(X)))
         Y = self.bn2(self.conv2(Y))
 
         if self.cbam:
@@ -93,7 +96,7 @@ class Residual(nn.Module):
             X = self.conv3(X)
 
         Y += X
-        return F.relu(Y, inplace=True)
+        return self.relu(Y)
 
 
 class ResNet3D(nn.Module):

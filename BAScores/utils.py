@@ -6,9 +6,9 @@ import nibabel as nib
 import numpy as np
 import seaborn as sns
 import torch
-import torch.nn.functional as F
 from sklearn.metrics import confusion_matrix
 from torch import nn
+from torch.nn import functional as F
 
 
 def get_prefix_oasis(img_name: str) -> str:
