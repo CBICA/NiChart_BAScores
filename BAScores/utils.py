@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Optional
+from typing import Any, Optional
 
 import matplotlib.pyplot as plt
 import nibabel as nib
@@ -226,3 +226,8 @@ def save_3d_attention(
         nib.save(att_img, f"{output_dir}/{out_name}")
     else:
         nib.save(att_img, f"{output_dir}/{out_name}.nii.gz")
+
+
+def save_attention_as_niftii(att_map: torch.Tensor, affine: Any, out_path: str) -> None:
+    att_img = nib.Nifti1Image(att_map, affine)
+    nib.save(att_img, out_path)

@@ -1,15 +1,17 @@
 import os
 
 import nibabel as nib
+import numpy as np
 import pandas as pd
 import torch
+from medcam import medcam
 from torch import nn
 from torch.utils.data import DataLoader
 from typing_extensions import Literal
 
 from BAScores.loader import SingleSubjectDataloader
 from BAScores.models.guided_back_propagation import GuidedBackPropagation
-from BAScores.utils import load_single_model_weights
+from BAScores.utils import load_single_model_weights, save_attention_as_niftii
 
 
 def inference(
@@ -25,17 +27,13 @@ def inference(
     load_single_model_weights(model, model_weights, device)
 
     if return_attention:
-
-        @GuidedBackPropagation(output_dir=out_dir, device=device, mode=mode)
-        class _Model(nn.Module):
-            def __init__(self) -> None:
-                super().__init__()
-                self.net = model
-
-            def forward(self, x: torch.Tensor) -> torch.Tensor:
-                return self.net(x)
-
-        model = _Model()
+        model = medcam.inject(
+            model,
+            output_dir=out_dir,
+            backend="gbp",
+            save_maps=False,
+            return_attention=True,
+        )
 
     single_loader = SingleSubjectDataloader(
         mode="inference",
@@ -53,32 +51,29 @@ def inference(
     model.eval()
 
     y_preds = []
-    for _, (imgs, mrids) in enumerate(dataloader):
-        preprocessed_img = nib.load(f"{in_dir}/{mrids[0]}_T1_LPS_dlicv_aligned.nii.gz")
-        imgs = imgs.to(device)
-        imgs = imgs.float()
-        imgs.requires_grad_()
+    with torch.no_grad():
+        for idx, (imgs, mrids) in enumerate(dataloader):
+            affine = nib.load(f"{in_dir}/{mrids[0]}_T1_LPS_dlicv_aligned.nii.gz").affine
+            imgs = imgs.to(device)
+            imgs = imgs.float()
 
-        if return_attention:
-            y_pred = model(
-                imgs,
-                niftii_header=preprocessed_img.header.copy(),
-                out_name=f"{mrids[0]}_T1_LPS_dlicv_aligned.nii.gz",
-            ).squeeze(dim=-1)
-        else:
-            y_pred = model(imgs).squeeze(dim=-1)
+            y_pred, attention = model(imgs)
+            y_pred = y_pred.view(-1)
+            attention = np.squeeze(attention)
 
-        if mode == "binary":
-            y_pred = (torch.sigmoid(y_pred) > 0.5).float()
-        elif mode == "multiclass":
-            y_pred = torch.argmax(y_pred, dim=1)
+            y_pred = y_pred.cpu().tolist()
+            attention = attention.cpu().numpy()
+            save_attention_as_niftii(
+                attention,
+                affine,
+                f"../{mrids[0]}_T1_LPS_dlicv_aligned.nii.gz",
+            )
 
-        y_pred = y_pred.cpu().tolist()
-        if isinstance(mrids, (list, tuple)):
-            for mrid, pred in zip(mrids, y_pred):
-                y_preds.append((mrid, pred))
-        else:
-            y_preds.append((mrids, y_pred))
+            if isinstance(mrids, (list, tuple)):
+                for mrid, pred in zip(mrids, y_pred):
+                    y_preds.append((mrid, pred))
+            else:
+                y_preds.append((mrids, y_pred))
 
     inference_res = pd.DataFrame(
         {
@@ -86,9 +81,3 @@ def inference(
             "Prediction": [y_pred[1] for y_pred in y_preds],
         }
     )
-    output_dir = os.path.dirname(csv)
-
-    if output_dir and not os.path.exists(output_dir):
-        os.makedirs(output_dir, exist_ok=True)
-
-    inference_res.to_csv(csv, index=False)
