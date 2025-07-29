@@ -11,13 +11,6 @@ from torch import nn
 from torch.nn import functional as F
 
 
-def get_prefix_oasis(img_name: str) -> str:
-    """
-    TODO: This one was specific, but will change
-    """
-    return str(img_name[: len(img_name) - 37])
-
-
 def get_prefix(img_name: str) -> str:
     """
     Returns the prefix(the name or label) of the images. Note that, the images

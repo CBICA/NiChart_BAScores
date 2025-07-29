@@ -11,7 +11,7 @@ import torchio as tio
 from torch.utils.data import DataLoader, Dataset
 from typing_extensions import Literal
 
-from BAScores.utils import get_prefix, get_prefix_oasis
+from BAScores.utils import get_prefix
 
 validation_transform = tio.Compose(
     [
@@ -128,7 +128,7 @@ class SingleSubjectDataloader(Dataset):
 
 class PairwiseDataloader(Dataset):
     """
-    Class for the Pairwise Dataloader. Returns the input tensors with theri labels(as a torch.tensor)
+    Class for the Pairwise Dataloader. Returns the input tensors with their labels(as a torch.tensor)
 
     :param mode: train, evaluate or inference
     :type mode: str
@@ -144,60 +144,47 @@ class PairwiseDataloader(Dataset):
         self,
         mode: Literal["train", "evaluate", "inference"],
         in_dir: str,
-        label_dict: Optional[dict] = None,
+        in_csv: pd.DataFrame,
+        label_dict: dict,
         data_augmentation: bool = False,
     ) -> None:
         super().__init__()
 
         assert mode in ["train", "evaluate", "inference"]
-        if label_dict is not None:
-            assert (
-                mode != "inference"
-            ), "Can't perform inference with a passed label dict."
-        else:
-            assert (
-                mode == "inference"
-            ), "Can't perform training or evaluation without a label dict."
 
         self.in_dir = Path(in_dir)
         self.data_augmentation = data_augmentation
         self.mode = mode
         self.label_dict = label_dict
-        self.image_groups = self._group_images()
+        self.in_csv = in_csv
+        self.img_suffix = "_T1_LPS_dlicv_aligned.nii.gz"
         self.pairs = self._create_pairs()
-
-    def _group_images(self) -> dict:
-        image_groups: dict = {}
-        for img_name in os.listdir(self.in_dir):
-            if img_name.endswith(".nii.gz"):
-                subject_prefix = get_prefix_oasis(img_name)
-                image_path = self.in_dir / img_name
-                if subject_prefix not in image_groups:
-                    image_groups[subject_prefix] = []
-                image_groups[subject_prefix].append(image_path)
-
-        for key in image_groups:
-            image_groups[key].sort()
-
-        return image_groups
 
     def _create_pairs(self) -> list:
         pairs: list = []
-        for subject_images in self.image_groups.values():
-            if len(subject_images) > 1:
-                subject_pairs = list(itertools.combinations(subject_images, 2))
-                for img1, img2 in subject_pairs:
-                    if self.mode == "inference":
-                        pairs.append((img1, img2))
-                    else:
-                        if self.label_dict is not None:
-                            if (
-                                get_prefix(img1.name) in self.label_dict
-                                and get_prefix(img2.name) in self.label_dict
-                            ):
-                                label1 = self.label_dict[get_prefix(img1.name)]
-                                label2 = self.label_dict[get_prefix(img2.name)]
-                                pairs.append((img1, img2, label1, label2))
+
+        ptid_groups = {}  # type: ignore
+        for img_name in os.listdir(self.in_dir):
+            mrid = get_prefix(img_name)
+            img_ptid = self.in_csv.loc[self.in_csv["MRID"] == mrid, "PTID"].values[
+                0
+            ]  # assume this will always return a 1d-array with size 1
+            if img_ptid not in ptid_groups:
+                ptid_groups[img_ptid] = []
+            ptid_groups[img_ptid].append(mrid)
+
+        for ptid, mrids in ptid_groups.items():
+            subject_pairs = list(itertools.combinations(mrids, 2))
+            for mrid1, mrid2 in subject_pairs:
+                img1_path = self.in_dir / (mrid1 + self.img_suffix)
+                img2_path = self.in_dir / (mrid2 + self.img_suffix)
+                if self.mode == "inference":
+                    pairs.append((img1_path, img2_path))
+                else:
+                    if self.label_dict is not None:
+                        label1 = self.label_dict[ptid][mrid1]
+                        label2 = self.label_dict[ptid][mrid2]
+                        pairs.append((img1_path, img2_path, label1, label2))
 
         return pairs
 
@@ -283,15 +270,23 @@ def create_dataloaders(
     test_dir = f"{in_dir}/test"
     eval_dir = f"{in_dir}/eval"
 
-    labels = pd.read_csv(label_dict_csv)
+    in_csv = pd.read_csv(label_dict_csv)
 
-    label_dict = {row["MRID"]: row[target] for _, row in labels.iterrows()}
+    if pairwise:
+        label_dict = {}  # type: ignore
+        for _, row in in_csv.iterrows():
+            if row["PTID"] not in label_dict:
+                label_dict[row["PTID"]] = {}
+            label_dict[row["PTID"]][row["MRID"]] = row[target]
+    else:
+        label_dict = {row["MRID"]: row[target] for _, row in in_csv.iterrows()}
 
     if pairwise:
         if os.path.isdir(train_dir):
             train_loader = PairwiseDataloader(
                 mode="train",
                 in_dir=train_dir,
+                in_csv=in_csv,
                 label_dict=label_dict,
                 data_augmentation=True,
             )
@@ -302,6 +297,7 @@ def create_dataloaders(
             test_loader = PairwiseDataloader(
                 mode="evaluate",
                 in_dir=test_dir,
+                in_csv=in_csv,
                 label_dict=label_dict,
                 data_augmentation=False,
             )
@@ -312,6 +308,7 @@ def create_dataloaders(
             eval_loader = PairwiseDataloader(
                 mode="evaluate",
                 in_dir=eval_dir,
+                in_csv=in_csv,
                 label_dict=label_dict,
                 data_augmentation=False,
             )
@@ -380,7 +377,7 @@ def create_dataloaders(
     else:
         eval_dataloader = None
 
-    # print(
-    # f"Generated {len(train_dataloader)}, {len(test_dataloader)}, {len(eval_dataloader)}"
-    # )
+    print(
+        f"Generated {len(train_dataloader)}, {len(test_dataloader)}, {len(eval_dataloader)}"
+    )
     return train_dataloader, test_dataloader, eval_dataloader
