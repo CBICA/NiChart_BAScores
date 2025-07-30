@@ -13,12 +13,6 @@ from typing_extensions import Literal
 
 from BAScores.utils import get_prefix
 
-validation_transform = tio.Compose(
-    [
-        tio.Resize((128, 128, 128)),
-    ]
-)
-
 
 class SingleSubjectDataloader(Dataset):
     """
