@@ -19,7 +19,7 @@ def train_step(
     device: Literal["cuda", "mps", "cpu"] = "cuda",
 ) -> Dict:
 
-    model.train(True)
+    model.train()
 
     stats = {"train_mae": 0.0, "train_mse": 0.0, "train_nrmse": 0.0, "train_r2": 0.0}
 
@@ -28,19 +28,25 @@ def train_step(
     r2_score = R2Score().to(device)
 
     for I1, I2, y1, y2 in dataloader:
-        I1, I2 = I1.to(device, dtype=torch.float32), I2.to(device, dtype=torch.float32)
-        y1, y2 = y1.to(device, dtype=torch.long), y2.to(device, dtype=torch.long)
+        I1, I2 = I1.to(device), I2.to(device)
+        y1, y2 = y1.to(device), y2.to(device)
+
+        I1, I2 = I1.float(), I2.float()
+        y1, y2 = y1.float(), y2.float()
+        y = y2 - y1
 
         # zero grad
         optimizer.zero_grad()
 
         # forward
-        y1 = y1.float()
-        y2 = y2.float()
         y_pred = model(I1, I2).squeeze(dim=-1)
+        print("###########")
+        print(f"y_pred: {y_pred}")
+        print(f"y: {y}")
+        print("###########")
 
         # loss computation
-        loss = loss_fn(y_pred, y2 - y1)
+        loss = loss_fn(y_pred, y)
 
         # loss backward
         loss.backward()
@@ -49,9 +55,9 @@ def train_step(
         optimizer.step()
 
         stats["train_mae"] += loss.item()
-        mse.update(y_pred, y2 - y1)
-        nrmse.update(y_pred, y2 - y1)
-        r2_score.update(y_pred, y2 - y1)
+        mse.update(y_pred, y)
+        nrmse.update(y_pred, y)
+        r2_score.update(y_pred, y)
 
     stats["train_mae"] = stats["train_mae"] / float(len(dataloader))
     stats["train_mse"] = mse.compute().item()
@@ -78,21 +84,20 @@ def test_step(
 
     with torch.no_grad():
         for I1, I2, y1, y2 in dataloader:
-            I1, I2 = I1.to(device, dtype=torch.float32), I2.to(
-                device, dtype=torch.float32
-            )
-            y1, y2 = y1.to(device, dtype=torch.long), y2.to(device, dtype=torch.long)
+            I1, I2 = I1.to(device), I2.to(device)
+            y1, y2 = y1.to(device), y2.to(device)
 
-            y1 = y1.float()
-            y2 = y2.float()
+            I1, I2 = I1.float(), I2.float()
+            y1, y2 = y1.float(), y2.float()
+            y = y2 - y1
+
             test_pred_logits = model(I1, I2).squeeze(dim=-1)
-
-            loss = loss_fn(test_pred_logits, y2 - y1)
+            loss = loss_fn(test_pred_logits, y)
 
             stats["test_mae"] += loss.item()
-            mse.update(test_pred_logits, y2 - y1)
-            nrmse.update(test_pred_logits, y2 - y1)
-            r2_score.update(test_pred_logits, y2 - y1)
+            mse.update(test_pred_logits, y)
+            nrmse.update(test_pred_logits, y)
+            r2_score.update(test_pred_logits, y)
 
     stats["test_mae"] = stats["test_mae"] / float(len(dataloader))
     stats["test_mse"] = mse.compute().item()

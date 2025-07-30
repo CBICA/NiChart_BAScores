@@ -163,27 +163,25 @@ class PairwiseDataloader(Dataset):
     def _create_pairs(self) -> list:
         pairs: list = []
 
-        ptid_groups = {}  # type: ignore
-        for img_name in os.listdir(self.in_dir):
-            mrid = get_prefix(img_name)
-            img_ptid = self.in_csv.loc[self.in_csv["MRID"] == mrid, "PTID"].values[
-                0
-            ]  # assume this will always return a 1d-array with size 1
-            if img_ptid not in ptid_groups:
-                ptid_groups[img_ptid] = []
-            ptid_groups[img_ptid].append(mrid)
+        ptid_groups = self.in_csv.sort_values(by=["PTID", "Age"]).groupby("PTID")
 
-        for ptid, mrids in ptid_groups.items():
+        for ptid, group in ptid_groups:
+            mrids = group["MRID"].tolist()
             subject_pairs = list(itertools.combinations(mrids, 2))
             for mrid1, mrid2 in subject_pairs:
                 img1_path = self.in_dir / (mrid1 + self.img_suffix)
                 img2_path = self.in_dir / (mrid2 + self.img_suffix)
+
+                if not img1_path.exists() or not img2_path.exists():
+                    continue
+
                 if self.mode == "inference":
                     pairs.append((img1_path, img2_path))
                 else:
                     if self.label_dict is not None:
                         label1 = self.label_dict[ptid][mrid1]
                         label2 = self.label_dict[ptid][mrid2]
+                        # assert label2 >= label1
                         pairs.append((img1_path, img2_path, label1, label2))
 
         return pairs
@@ -377,7 +375,7 @@ def create_dataloaders(
     else:
         eval_dataloader = None
 
-    print(
-        f"Generated {len(train_dataloader)}, {len(test_dataloader)}, {len(eval_dataloader)}"
-    )
+    # print(
+    # f"Generated {len(train_dataloader)}, {len(test_dataloader)}, {len(eval_dataloader)}"
+    # )
     return train_dataloader, test_dataloader, eval_dataloader

@@ -46,27 +46,22 @@ def evaluate(
     y_hats = []
     with torch.no_grad():
         for batch, (I1, I2, y1, y2) in enumerate(dataloader):
-            I1, I2 = I1.to(device, dtype=torch.float32), I2.to(
-                device, dtype=torch.float32
-            )
+            I1, I2 = I1.to(device), I2.to(device)
             y1, y2 = y1.to(device), y2.to(device)
 
-            y1 = y1.float()
-            y2 = y2.float()
+            I1, I2 = I1.float(), I2.float()
+            y1, y2 = y1.float(), y2.float()
+            y = y2 - y1
 
             y_pred = model(I1, I2).squeeze(dim=-1)
 
-            if len(y_pred) > 1:
-                y_preds.extend(y_pred.cpu().item())
-                y_hats.extend((y2 - y1).cpu().tolist())
-            else:
-                y_preds.append(y_pred.cpu().item())
-                y_hats.append((y2 - y1).cpu().tolist())
+            y_preds.append(y_pred.cpu().item())
+            y_hats.append(y.cpu().item())
 
-            mae.update(y_pred, y2 - y1)
-            mse.update(y_pred, y2 - y1)
-            nrmse.update(y_pred, y2 - y1)
-            r2_score.update(y_pred, y2 - y1)
+            mae.update(y_pred, y)
+            mse.update(y_pred, y)
+            nrmse.update(y_pred, y)
+            r2_score.update(y_pred, y)
 
     eval_stats["eval_mae"] = mae.compute().item()
     eval_stats["eval_mse"] = mse.compute().item()
