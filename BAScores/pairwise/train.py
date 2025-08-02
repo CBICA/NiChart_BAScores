@@ -39,11 +39,7 @@ def train_step(
         optimizer.zero_grad()
 
         # forward
-        y_pred = model(I1, I2).squeeze(dim=-1)
-        print("###########")
-        print(f"y_pred: {y_pred}")
-        print(f"y: {y}")
-        print("###########")
+        y_pred = model(I1, I2).squeeze()
 
         # loss computation
         loss = loss_fn(y_pred, y)
@@ -91,7 +87,7 @@ def test_step(
             y1, y2 = y1.float(), y2.float()
             y = y2 - y1
 
-            test_pred_logits = model(I1, I2).squeeze(dim=-1)
+            test_pred_logits = model(I1, I2).squeeze()
             loss = loss_fn(test_pred_logits, y)
 
             stats["test_mae"] += loss.item()
