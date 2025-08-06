@@ -58,10 +58,14 @@ def load_pairwise_model_weights(
         for k, v in pre_state_dict.items():
             if k.startswith("module."):  # If saved with DataParallel
                 new_k = k.replace("module.", "")
-            elif not any(
-                k.startswith(prefix) for prefix in ["net.", "net.0.", "net.0.net."]
-            ):
-                new_k = "net." + k
+            elif k.startswith("linear.0."):
+                if not model.meta:
+                    print("im here")
+                    new_k = k.replace("linear.0", "linear")
+                else:
+                    new_k = k
+            elif k.startswith("net."):
+                new_k = k.replace("net.", "")
             else:
                 new_k = k
 

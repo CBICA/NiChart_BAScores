@@ -184,6 +184,7 @@ def train(
 
     eval_stats = evaluate(
         model=model,
+        mode="regression",  # for now only
         dataloader=eval_dataloader,
         device=device,
     )

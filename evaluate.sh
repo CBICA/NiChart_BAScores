@@ -9,14 +9,15 @@
 #SBATCH --time=10:00:00
 
 NiChart_BAScores evaluate \
-                 --in_dir ../Datasets/BAScores/ISTAG_CN_All/istaging_2_new/CN_split \
+                 --in_dir ../Datasets/BAScores/pairwise/pairwise_ba_delta_training/ \
                  --model resnet18 \
                  --mode regression \
-                 --model_type single \
-                 --model_weights weights/BAScores_brain_age_ISTAGING2_new_healthy_only_AdamW_resnet18.pth \
-                 --label_dict ../Datasets/BAScores/ISTAG_CN_All/istaging_2_new/istag_controlNoOverlap.csv \
+                 --meta True \
+                 --model_type pairwise \
+                 --model_weights weights/BAScores_ba_delta_pairwise_plusmeta_ISTAGING2_new_Adadelta_resnet18.pth \
+                 --label_dict ../Datasets/BAScores/pairwise/istaging_interp.csv \
                  --device cuda \
                  --target Age \
                  --verbose \
-                 --plot_path healthy_only_adamw.png
+                 --plot_path pairwise_meta.png
                  

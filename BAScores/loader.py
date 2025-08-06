@@ -139,7 +139,7 @@ class PairwiseDataloader(Dataset):
         mode: Literal["train", "evaluate", "inference"],
         in_dir: str,
         in_csv: pd.DataFrame,
-        label_dict: dict,
+        label_dict: Optional[dict] = None,
         data_augmentation: bool = False,
     ) -> None:
         super().__init__()
@@ -152,6 +152,7 @@ class PairwiseDataloader(Dataset):
         self.label_dict = label_dict
         self.in_csv = in_csv
         self.img_suffix = "_T1_LPS_dlicv_aligned.nii.gz"
+        self.mrids: list = []
         self.pairs = self._create_pairs()
 
     def _create_pairs(self) -> list:
@@ -170,6 +171,7 @@ class PairwiseDataloader(Dataset):
                     continue
 
                 if self.mode == "inference":
+                    self.mrids.append((mrid1, mrid2))
                     pairs.append((img1_path, img2_path))
                 else:
                     if self.label_dict is not None:
@@ -235,7 +237,7 @@ class PairwiseDataloader(Dataset):
                 torch.tensor(label2, dtype=torch.float32),
             )
 
-        return img1_tensor, img2_tensor
+        return img1_tensor, img2_tensor, self.mrids[index][0], self.mrids[index][1]
 
 
 def create_dataloaders(

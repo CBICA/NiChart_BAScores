@@ -213,9 +213,10 @@ def run_evaluate(args: Any) -> None:
             plot_path=None if args.plot_path == "None" else args.plot_path,
         )
     else:
-        model = PairwiseModel3D(encoder=encoder, device=args.device)
+        model = PairwiseModel3D(encoder=encoder, meta=args.meta, device=args.device)
         _ = evaluate_pairwise(
             model=model,
+            mode=args.mode,
             dataloader=eval_dataloader,
             device=args.device,
             model_weights=args.model_weights,
@@ -245,15 +246,19 @@ def run_inference(args: Any) -> None:
         )
     else:
         # This needs a bit of work
-        model = PairwiseModel3D(encoder=encoder, device=args.device)
+        model = PairwiseModel3D(encoder=encoder, meta=args.meta, device=args.device)
+        assert (
+            args.in_csv != "None"
+        ), "You have to provide the input csv for pairwise inference"
         inference_pairwise(
             model=model,
+            mode=args.mode,
             model_weights=args.model_weights,
             in_dir=args.in_dir,
             out_dir=args.out_dir,
+            in_csv=args.in_csv,
             csv=args.csv,
             device=args.device,
-            batch_size=args.batch_size,
         )
 
 
@@ -454,6 +459,14 @@ def main() -> None:
     )
 
     evaluate.add_argument(
+        "--meta",
+        type=bool,
+        required=False,
+        default=False,
+        help="Set meta to True for pairwise models",
+    )
+
+    evaluate.add_argument(
         "--model_weights",
         type=str,
         required=True,
@@ -528,6 +541,14 @@ def main() -> None:
     )
 
     inference.add_argument(
+        "--in_csv",
+        type=str,
+        required=False,
+        default="None",
+        help="Provide the input csv: in_csv only with pairwise models",
+    )
+
+    inference.add_argument(
         "--csv",
         type=str,
         default="inference_res.csv",
@@ -555,6 +576,14 @@ def main() -> None:
         type=str,
         required=True,
         help="[REQUIRED] Either single or pairwise",
+    )
+
+    inference.add_argument(
+        "--meta",
+        type=bool,
+        required=False,
+        default=False,
+        help="Set meta to True for pairwise models",
     )
 
     inference.add_argument(

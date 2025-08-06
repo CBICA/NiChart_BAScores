@@ -46,7 +46,6 @@ def inference(
         batch_size=1,
         shuffle=False,
         num_workers=os.cpu_count() // 2,  # type: ignore
-        pin_memory=True,
     )
 
     model.to(device)

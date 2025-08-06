@@ -16,6 +16,7 @@ from BAScores.utils import load_pairwise_model_weights, plot_preds_vs_truth
 def evaluate(
     model: torch.nn.Module,
     dataloader: DataLoader,
+    mode: str,
     device: Literal["cuda", "mps", "cpu"] = "cuda",
     model_weights: Optional[str] = None,
     verbose: bool = False,
@@ -24,7 +25,9 @@ def evaluate(
 
     if model_weights is not None:
         load_pairwise_model_weights(
-            model=model, model_weights=model_weights, device=device
+            model=model,
+            model_weights=model_weights,
+            device=device,
         )
 
     model.to(device)
@@ -69,7 +72,10 @@ def evaluate(
     eval_stats["eval_r2"] = r2_score.compute().item()
 
     if plot_path is not None:
-        plot_preds_vs_truth(y_preds, y_hats, eval_stats, plot_path)
+        # TODO: more modes should exist
+        plot_preds_vs_truth(
+            y_preds, y_hats, eval_stats, mode="regression", out_path=plot_path
+        )
 
     if verbose:
         print(
