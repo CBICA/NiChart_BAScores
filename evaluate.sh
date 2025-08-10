@@ -12,12 +12,11 @@ NiChart_BAScores evaluate \
                  --in_dir ../Datasets/BAScores/pairwise/pairwise_ba_delta_training/ \
                  --model resnet18 \
                  --mode regression \
-                 --meta True \
                  --model_type pairwise \
-                 --model_weights weights/BAScores_ba_delta_pairwise_plusmeta_ISTAGING2_new_Adadelta_resnet18.pth \
+                 --model_weights weights/BAScores_ba_delta_revised_ISTAGING2_new_Adadelta_resnet18.pth \
                  --label_dict ../Datasets/BAScores/pairwise/istaging_interp.csv \
                  --device cuda \
                  --target Age \
                  --verbose \
-                 --plot_path pairwise_meta.png
+                 --plot_path pairwise.png
                  

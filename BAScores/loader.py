@@ -177,8 +177,10 @@ class PairwiseDataloader(Dataset):
                     if self.label_dict is not None:
                         label1 = self.label_dict[ptid][mrid1]
                         label2 = self.label_dict[ptid][mrid2]
-                        # assert label2 >= label1
-                        pairs.append((img1_path, img2_path, label1, label2))
+                        if random.randint(0, 1):
+                            pairs.append((img2_path, img1_path, label2, label1))
+                        else:
+                            pairs.append((img1_path, img2_path, label1, label2))
 
         return pairs
 

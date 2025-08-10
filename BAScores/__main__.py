@@ -155,7 +155,7 @@ def run_train(args: Any) -> None:
             verbose=args.verbose,
         )
     else:
-        model = PairwiseModel3D(encoder, device=args.device)
+        model = PairwiseModel3D(encoder, meta=args.meta, device=args.device)
         optimizer = select_optimizer(
             model=model,
             optimizer=args.optimizer,
@@ -352,6 +352,14 @@ def main() -> None:
         default="resnet18",
         required=False,
         help="The encoder that will be used. Currently available: [resnet18, resnet34]",
+    )
+
+    train.add_argument(
+        "--meta",
+        type=bool,
+        required=False,
+        default=False,
+        help="set meta to True for pairwise models",
     )
 
     train.add_argument(

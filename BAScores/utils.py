@@ -51,7 +51,6 @@ def load_pairwise_model_weights(
 
     model_state_keys = set(model.state_dict().keys())
     checkpoint_keys = set(pre_state_dict.keys())
-
     if model_state_keys != checkpoint_keys:
         new_state_dict = OrderedDict()
 
@@ -60,7 +59,6 @@ def load_pairwise_model_weights(
                 new_k = k.replace("module.", "")
             elif k.startswith("linear.0."):
                 if not model.meta:
-                    print("im here")
                     new_k = k.replace("linear.0", "linear")
                 else:
                     new_k = k
