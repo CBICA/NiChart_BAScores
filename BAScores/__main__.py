@@ -165,6 +165,7 @@ def run_train(args: Any) -> None:
 
         _ = train_pairwise(
             model=model,
+            mode=args.mode,
             train_dataloader=train_dataloader,
             test_dataloader=test_dataloader,
             eval_dataloader=eval_dataloader,
@@ -172,6 +173,7 @@ def run_train(args: Any) -> None:
             loss_fn=loss_fn,
             epochs=args.epochs,
             patience=args.patience,
+            num_classes=None if args.num_classes == -1 else args.num_classes,
             device=args.device,
             target_dir=args.out_dir,
             model_name=args.model_name,
@@ -259,6 +261,7 @@ def run_inference(args: Any) -> None:
             in_csv=args.in_csv,
             csv=args.csv,
             device=args.device,
+            plot_path=args.plot_path if args.plot_path != "None" else None,
         )
 
 
@@ -630,6 +633,14 @@ def main() -> None:
         "--return_attention",
         action="store_true",
         help="Returns the attention maps in the specified output directory",
+    )
+
+    inference.add_argument(
+        "--plot_path",
+        type=str,
+        default="None",
+        required=False,
+        help="Save a t-SNE cluster plot(only for pairwise for now)",
     )
     inference.set_defaults(func=run_inference)
 

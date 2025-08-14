@@ -17,10 +17,20 @@ class PairwiseModel3D(nn.Module):
         else:
             self.linear = nn.Sequential(*list(encoder.net.children())[-1]).to(device)
 
-    def forward(self, x1: torch.Tensor, x2: torch.Tensor) -> torch.Tensor:
+    def forward(
+        self, x1: torch.Tensor, x2: torch.Tensor, return_features: bool = False
+    ) -> tuple[torch.Tensor, torch.Tensor] | torch.Tensor:
         f1 = self.backbone(x2)
         f2 = self.backbone(x1)
         f3 = f2 - f1
         if self.meta:
-            return self.linear(torch.cat((f1, f2, f3), dim=1))
-        return self.linear(f3)
+            features = torch.cat((f1, f2, f3), dim=1)
+            res = self.linear(features)
+        else:
+            features = f3
+            res = self.linear(f3)
+
+        if return_features:
+            return res, features
+
+        return res

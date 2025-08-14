@@ -221,3 +221,16 @@ def save_3d_attention(
         nib.save(att_img, f"{output_dir}/{out_name}")
     else:
         nib.save(att_img, f"{output_dir}/{out_name}.nii.gz")
+
+
+def plot_tsne_clusters(features: list, out_path: str) -> None:
+    plt.figure(figsize=(10, 8))
+    plt.scatter(
+        features[:, 0],
+        features[:, 1],
+        cmap=plt.cm.get_cmap("tab10", 10),
+        s=15,
+    )
+    plt.title("t-SNE clusters plot")
+    plt.savefig(out_path, format="png", dpi=300)
+    plt.close()
