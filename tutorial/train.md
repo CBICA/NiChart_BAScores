@@ -10,6 +10,9 @@ NiChart_BAScores train \
                  --device [cuda, mps, cpu] \
                  --model_type [single, pairwise] \
                  --model [model name(for example: resnet18)] \
+                 --meta [True of False(for pairwise only)] \
+                 --pretrained_single [path to single input model weights] \
+                 --pretrained_pairwise [path to pairwise model weights] \
                  --target [target name(same as in label dict)] \
                  --optimizer [Optimizer name(See below)] \
                  --batch_size [batch size(int)] \
@@ -28,6 +31,9 @@ NiChart_BAScores train \
 - device: Either cuda, mps or cpu
 - model: The type of backbone, currently supported: [resnet18, resnet34]
 - model_type: Either single or pairwise
+- meta: Only for the pairwise models, if set to True for single input models it won't affect anything. If True, it enables concatenation of the features with the difference.
+- pretrained_single: You can set pretrained weights as a starting phase for training, you can only pass single input type of weights here
+- pretrained_pairwise: You can use pairwise weights as well, if you do that, only the backbone weights will be loaded(can't use single input type weights for pairwise models)
 - target: The name of the target value(same as in the label dict)
 - optimizer: We support a limited amount of tested optimizer for brain age values, you can see them at the [main](../BAScores/__main__.py)
 - batch_size: The batch size that the loader will use

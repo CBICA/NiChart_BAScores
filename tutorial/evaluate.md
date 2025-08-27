@@ -7,6 +7,7 @@ NiChart_BAScores evaluate \
                  --mode [binary, multiclass, regression] \
                  --model_type [single, pairwise] \
                  --model_weights [model weights name(.pth)] \
+                 --meta [Either True or False] \
                  --label_dict [path to .csv] \
                  --target [target name(same as label dict)] \
                  --device [cuda, mps, cpu] \
@@ -18,6 +19,7 @@ NiChart_BAScores evaluate \
 - model: The type of backbone, currently supported: [resnet18, resnet34]
 - model_type: Either single or pairwise
 - model_weights: The path to a .pth file that contains the weights of the selected model
+- meta: Only for the pairwise models, if set to True for single input models it won't affect anything. If True, it enables concatenation of the features with the difference.
 - label_dict: The path to a .csv file that must contain a column with the MRID's and a column with the values of the targets
 - target: The name of the target value(same as in the label dict)
 - device: Either cuda, mps or cpu

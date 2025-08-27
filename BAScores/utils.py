@@ -41,7 +41,12 @@ def load_single_model_weights(
                 f"Warning: Key '{new_k}' from checkpoint does not match any key in the model."
             )
 
-    model.load_state_dict(new_state_dict, strict=True)
+    missing_keys, unexpected_keys = model.load_state_dict(new_state_dict, strict=False)
+
+    if missing_keys:
+        print(f"Warning: Missing keys in model: {missing_keys}")
+    if unexpected_keys:
+        print(f"Warning: Unexpected keys from pairwise model: {unexpected_keys}")
 
 
 def load_pairwise_model_weights(
@@ -49,6 +54,7 @@ def load_pairwise_model_weights(
 ) -> None:
     pre_state_dict = torch.load(model_weights, map_location=torch.device(device))
 
+    missing_keys, unexpected_keys = None, None
     model_state_keys = set(model.state_dict().keys())
     checkpoint_keys = set(pre_state_dict.keys())
     if model_state_keys != checkpoint_keys:
@@ -69,9 +75,57 @@ def load_pairwise_model_weights(
 
             new_state_dict[new_k] = v
 
-        model.load_state_dict(new_state_dict, strict=True)
+        missing_keys, unexpected_keys = model.load_state_dict(
+            new_state_dict, strict=False
+        )
     else:
-        model.load_state_dict(pre_state_dict)
+        model.load_state_dict(pre_state_dict, strict=False)
+
+    if missing_keys:
+        print(f"Warning: Missing keys in model: {missing_keys}")
+    if unexpected_keys:
+        print(f"Warning: Unexpected keys from pairwise model: {unexpected_keys}")
+
+
+def load_backbone_weights_from_pairwise(
+    model: nn.Module,
+    weights: str,
+    device: str,
+) -> None:
+    pairwise_state_dict = torch.load(weights, map_location=torch.device(device))
+
+    new_state_dict = OrderedDict()
+
+    new_keys = set(model.state_dict().keys())
+
+    for key, value in pairwise_state_dict.items():
+        if key.startswith("linear"):
+            continue
+
+        new_key = key
+
+        if new_key.startswith("module."):
+            new_key = new_key.replace("module.", "")
+
+        if new_key.startswith("backbone."):
+            import re
+
+            if new_key.startswith("backbone.0."):
+                new_key = new_key.replace("backbone.0.", "net.0.")
+            else:
+                new_key = re.sub(
+                    r"backbone\.(\d+)", lambda m: f"net.b{int(m.group(1)) + 1}", new_key
+                )
+
+        if new_key in new_keys:
+            new_state_dict[new_key] = value
+
+    missing_keys, unexpected_keys = model.load_state_dict(new_state_dict, strict=False)
+
+    if missing_keys:
+        print(f"Warning: Missing keys in model: {missing_keys}")
+    if unexpected_keys:
+        print(f"Warning: Unexpected keys from pairwise model: {unexpected_keys}")
 
 
 def plot_preds_vs_truth(
@@ -223,14 +277,41 @@ def save_3d_attention(
         nib.save(att_img, f"{output_dir}/{out_name}.nii.gz")
 
 
-def plot_tsne_clusters(features: list, out_path: str) -> None:
-    plt.figure(figsize=(10, 8))
-    plt.scatter(
-        features[:, 0],
-        features[:, 1],
-        cmap=plt.cm.get_cmap("tab10", 10),
-        s=15,
-    )
-    plt.title("t-SNE clusters plot")
-    plt.savefig(out_path, format="png", dpi=300)
-    plt.close()
+def plot_tsne_clusters(features: list, labels: list, out_path: str) -> None:
+    if len(features[0]) == 3:
+        fig = plt.figure(figsize=(10, 8))
+        ax = fig.add_subplot(111, projection="3d")
+
+        scatter = ax.scatter(
+            features[:, 0],
+            features[:, 1],
+            features[:, 2],
+            c=labels,
+            cmap=plt.cm.get_cmap("tab10", 10),
+            s=15,
+            alpha=0.8,
+        )
+
+        cbar = fig.colorbar(scatter, ax=ax, ticks=range(len(set(labels))))
+        cbar.set_label("Label")
+
+        ax.set_title("t-SNE clusters plot (3D)")
+        ax.set_xlabel("Component 1")
+        ax.set_ylabel("Component 2")
+        ax.set_zlabel("Component 3")
+
+        plt.savefig(out_path, format="png", dpi=300)
+        plt.close()
+    else:
+        plt.figure(figsize=(10, 8))
+        scatter = plt.scatter(
+            features[:, 0],
+            features[:, 1],
+            c=labels,
+            cmap=plt.cm.get_cmap("tab10", 10),
+            s=15,
+        )
+        plt.colorbar(scatter, ticks=range(len(labels)), label="Label")
+        plt.title("t-SNE clusters plot")
+        plt.savefig(out_path, format="png", dpi=300)
+        plt.close()

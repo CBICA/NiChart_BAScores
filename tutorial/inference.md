@@ -9,6 +9,7 @@ NiChart_BAScores inference \
                  --device [cuda, mps, cpu] \
                  --model_type [single, pairwise] \
                  --model [model name(for example: resnet18)] \
+                 --meta [True of False(for pairwise only)] \
                  --mode [regression, binary, multiclass]
                  --model_weights [model weights name(.pth)] \
                  --return_attention
@@ -20,6 +21,7 @@ NiChart_BAScores inference \
 - device: Either cuda, mps or cpu
 - model: The type of backbone, currently supported: [resnet18, resnet34]
 - model_type: Either single or pairwise
+- meta: Only for the pairwise models, if set to True for single input models it won't affect anything. If True, it enables concatenation of the features with the difference.
 - mode: Either regression, binary or multiclass
 - model_weights: The path to a .pth file that contains the weights of the selected model
 - return_attention: Set if you want to save the attention maps of the passed

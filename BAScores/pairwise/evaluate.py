@@ -1,6 +1,9 @@
 from typing import Optional
 
+import numpy as np
 import torch
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 from torch.utils.data import DataLoader
 from torchmetrics import (
     AUROC,
@@ -16,7 +19,11 @@ from torchmetrics import (
 )
 from typing_extensions import Literal
 
-from BAScores.utils import load_pairwise_model_weights, plot_preds_vs_truth
+from BAScores.utils import (
+    load_pairwise_model_weights,
+    plot_preds_vs_truth,
+    plot_tsne_clusters,
+)
 
 
 def evaluate(
@@ -91,6 +98,7 @@ def evaluate(
 
     y_preds = []
     y_hats = []
+    y_features = []
     with torch.no_grad():
         for batch, (I1, I2, y1, y2) in enumerate(dataloader):
             I1, I2 = I1.to(device), I2.to(device)
@@ -104,7 +112,15 @@ def evaluate(
                 y1, y2 = y1.long(), y2.long()
                 y = y2
 
-            y_pred = model(I1, I2).squeeze(dim=-1)
+            y_pred, y_feature = model(I1, I2, return_features=True)
+            y_pred = y_pred.squeeze(dim=-1)
+
+            if mode != "regression":
+                y_feature = np.array(y_feature.squeeze().cpu())
+
+                if y_feature.ndim != 1:
+                    y_feature = y_feature.flatten()
+                y_features.append(y_feature)
 
             if mode == "regression":
                 y_preds.append(y_pred.cpu().item())
@@ -145,6 +161,15 @@ def evaluate(
 
     if plot_path is not None:
         plot_preds_vs_truth(y_preds, y_hats, eval_stats, mode, plot_path)
+        if mode != "regression":
+            PCA_features = PCA(n_components=50).fit_transform(y_features)
+            TSNE_features = TSNE(
+                n_components=2,
+                learning_rate="auto",
+                init="pca",
+                perplexity=30,
+            ).fit_transform(PCA_features)
+            plot_tsne_clusters(TSNE_features, y_hats, plot_path[:-4] + "_tsne.png")
 
     if verbose:
         if mode == "regression":

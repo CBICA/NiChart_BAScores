@@ -13,6 +13,11 @@ from BAScores.pairwise.train import train as train_pairwise
 from BAScores.single_subject.evaluate import evaluate as evaluate_single
 from BAScores.single_subject.inference import inference as inference_single
 from BAScores.single_subject.train import train as train_single
+from BAScores.utils import (
+    load_backbone_weights_from_pairwise,
+    load_pairwise_model_weights,
+    load_single_model_weights,
+)
 
 
 def available_models(num_classes: int, device: str, dropout: float) -> dict:
@@ -131,6 +136,19 @@ def run_train(args: Any) -> None:
     )
     if args.model_type == "single":
         model = encoder
+        if args.pretrained_single != "None":
+            assert (
+                args.pretrained_pairwise == "None"
+            ), "You can only pass either pretrained_single or pretrained_pairwise"
+            load_single_model_weights(model, args.pretrained_single, args.device)
+        elif args.pretrained_pairwise != "None":
+            assert (
+                args.pretrained_single == "None"
+            ), "You can only pass either pretrained_single or pretrained_pairwise"
+            load_backbone_weights_from_pairwise(
+                model, args.pretrained_pairwise, args.device
+            )
+
         optimizer = select_optimizer(
             model=model,
             optimizer=args.optimizer,
@@ -156,6 +174,12 @@ def run_train(args: Any) -> None:
         )
     else:
         model = PairwiseModel3D(encoder, meta=args.meta, device=args.device)
+        assert (
+            args.pretrained_single == "None"
+        ), "Can't pass pretrained_single for pairwise models"
+        if args.pretrained_pairwise != "None":
+            load_pairwise_model_weights(model, args.pretrained_pairwise, args.device)
+
         optimizer = select_optimizer(
             model=model,
             optimizer=args.optimizer,
@@ -261,7 +285,6 @@ def run_inference(args: Any) -> None:
             in_csv=args.in_csv,
             csv=args.csv,
             device=args.device,
-            plot_path=args.plot_path if args.plot_path != "None" else None,
         )
 
 
@@ -355,6 +378,23 @@ def main() -> None:
         default="resnet18",
         required=False,
         help="The encoder that will be used. Currently available: [resnet18, resnet34]",
+    )
+
+    train.add_argument(
+        "--pretrained_single",
+        type=str,
+        required=False,
+        default="None",
+        help="Option to pass pretrained single input weights as a starting point",
+    )
+
+    train.add_argument(
+        "--pretrained_pairwise",
+        type=str,
+        required=False,
+        default="None",
+        help="Option to pass pretrained pairwise type weights as a starting point. If used \
+                for single input models, then it will try to load backbone weights only",
     )
 
     train.add_argument(
@@ -633,14 +673,6 @@ def main() -> None:
         "--return_attention",
         action="store_true",
         help="Returns the attention maps in the specified output directory",
-    )
-
-    inference.add_argument(
-        "--plot_path",
-        type=str,
-        default="None",
-        required=False,
-        help="Save a t-SNE cluster plot(only for pairwise for now)",
     )
     inference.set_defaults(func=run_inference)
 

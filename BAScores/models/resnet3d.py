@@ -146,10 +146,11 @@ class ResNet3D(nn.Module):
             self.net.add_module(f"b{i+2}", block(*b, first_block=(i == 0)))  # type: ignore
 
         self.net.add_module(
-            "features",
+            "last",
             nn.Sequential(
                 nn.AdaptiveAvgPool3d((1, 1, 1)),
                 nn.Flatten(),
+                # nn.LazyLinear(num_classes),
             ).to(device),
         )
 
