@@ -2,6 +2,7 @@
 
 ## Overview
 NiChart_BAScores is an integrated NiChart package that helps users train/evaluate models or perform inference using our pre-trained models.
+Weights can be found in rleases.
 
 The user can either use the tool directly in NiChart or use the CLI by first installing it:
 > [!Note]
