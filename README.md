@@ -1,7 +1,7 @@
 # NiChart Brain Ageing Scores
 
 ## Overview
-NiChart_BAScores includes the official implementation of DeepSPARE-BA, our brain
+NiChart_BAScores includes the official implementation of [NiChart's](https://cloud.neuroimagingchart.com) DeepSPARE-BA, our brain
 age regression model based on a ResNet-18. Users can train or perform inference
 on their own data using our CLI.
 
