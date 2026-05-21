@@ -1,9 +1,15 @@
 # NiChart Brain Ageing Scores
 
 ## Overview
-NiChart_BAScores is an integrated NiChart package that helps users train/evaluate models or perform inference using our pre-trained models.
+NiChart_BAScores includes the official implementation of DeepSPARE-BA, our brain
+age regression model based on a ResNet-18. Users can train or perform inference
+on their own data using our CLI.
 
 **Weights can be found in the releases section.**
+
+![deepsparebaresults](assets/deep_spare_ba_results.png)
+![deepsparebagap](assets/deep_spare_ba_gap.png)
+![deepsparebavsspare](assets/deep_spare_ba_vs_spare.png)
 
 The user can either use the tool directly in NiChart or use the CLI by first installing it:
 > [!Note]
@@ -13,7 +19,10 @@ pip install -e .
 ```
 
 ### Training
-To train a model, you first need a directory that contains `train`, `test` and `eval` folders with niftii LPS oriented and DLICV preprocessed images(see [DLICV](https://github.com/CBICA/DLICV)) and a `csv` file that maps the `MRID`'s to the target value. Then, a simple example of training a `resnet18` on your data is by simply doing the following:
+To train a model, you first need a directory that contains `train`, `test` and `eval` folders with niftii LPS oriented and DLICV aligned 
+scans (see [NiChart_DLMUSE](https://github.com/CBICA/NiChart_DLMUSE) if you want the full pipeline for DLICV alignment and [flirt](https://fsl.fmrib.ox.ac.uk/fsl/docs/registration/flirt/index.html) 
+for linear registration) and a `csv` file that maps the `MRID`'s to the target value. Then, a simple example of training a `resnet18` on your data is by simply doing the following:
+
 ```bash
 NiChart_BAScores train \
                  --in_dir [input directory] \
