@@ -7,9 +7,9 @@ on their own data using our CLI.
 
 **Weights can be found in the releases section.**
 
-![deepsparebaresults](assets/deep_spare_ba_results.png)
-![deepsparebagap](assets/deep_spare_ba_gap.png)
-![deepsparebavsspare](assets/deep_spare_ba_vs_spare.png)
+![deep-spare-ba-results](assets/deep_spare_ba_results.png)
+![deep-spare-ba-gap](assets/deep_spare_ba_gap.png)
+![deep-spare-ba-vs-spare](assets/deep_spare_ba_vs_spare.png)
 
 The user can either use the tool directly in NiChart or use the CLI by first installing it:
 > [!Note]

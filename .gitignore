@@ -13,4 +13,5 @@ job.sh
 eval.sh
 
 # images
-*.png
+*.nii.gz
+*.nii
